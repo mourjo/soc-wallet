@@ -7,7 +7,7 @@ services:
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
       - POSTGRES_HOST_AUTH_METHOD=trust
-      - POSTGRES_DB=tinfoil_db
+      - POSTGRES_DB=soc_wallet_db
       - POSTGRES_PASSWORD=soc_wallet
       - POSTGRES_USER=justin
     ports:

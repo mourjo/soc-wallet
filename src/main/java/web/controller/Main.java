@@ -1,10 +1,9 @@
 package web.controller;
 
 import io.javalin.Javalin;
-import io.javalin.apibuilder.ApiBuilder;
-import io.javalin.openapi.plugin.OpenApiPlugin;
-import io.javalin.openapi.plugin.swagger.SwaggerPlugin;
 import lombok.extern.slf4j.Slf4j;
+import web.controller.javalin.ExceptionHandler;
+import web.controller.javalin.OpenAPISetup;
 
 @Slf4j
 public class Main {
@@ -13,28 +12,13 @@ public class Main {
 
 	public static void main(String[] args) {
 
-		app = Javalin.create(config -> {
-			config.registerPlugin(new OpenApiPlugin(pluginConfig -> {
-				pluginConfig.withDefinitionConfiguration((version, definition) -> {
-					definition.withInfo(info -> info.setTitle("SoC Wallet"));
-				}).withDocumentationPath("/openapi");
-			}));
-
-			config.registerPlugin(new SwaggerPlugin(pluginConfig -> {
-				pluginConfig.setUiPath("/swagger-ui");
-				pluginConfig.setDocumentationPath("/openapi");
-			}));
-
-			config.router.apiBuilder(() -> {
-				ApiBuilder.path("/user", () -> {
-					ApiBuilder.put(Controller::createUser);
-				});
-			});
-		}).exception(Exception.class, (e, ctx) -> {
-			log.error("Something wentwrong: {}", e, e);
-		});
+		app = Javalin.create(OpenAPISetup::registerPlugins)
+				.put("/user", Controller::createUser)
+				.get("/user/{userId}", Controller::retrieveUser)
+				.exception(Exception.class, ExceptionHandler::handleException);
 
 		app.start(8818);
 	}
+
 
 }
