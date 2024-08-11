@@ -6,7 +6,7 @@ class MainTest {
 
 	@Test
 	void testme() {
-		Assertions.assertEquals(1,1);
+		Assertions.assertEquals(1, 1);
 	}
 
 }
