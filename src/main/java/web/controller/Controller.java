@@ -5,8 +5,8 @@ import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.table;
 
 import entities.UserEntity;
-import exceptions.UserNotFoundException;
 import exceptions.UserAlreadyExistsException;
+import exceptions.UserNotFoundException;
 import io.javalin.http.Context;
 import io.javalin.openapi.HttpMethod;
 import io.javalin.openapi.OpenApi;
@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import web.controller.dto.ErrorResponse;
-
 import web.controller.dto.UserCreationRequest;
 import web.controller.dto.UserCreationResponse;
 import web.controller.dto.UserFetchResponse;
@@ -32,7 +31,8 @@ import web.controller.dto.UserFetchResponse;
 public class Controller {
 
 	@SneakyThrows
-	private static Connection getConnection(String host, String port, String database, String username) {
+	private static Connection getConnection(String host, String port, String database,
+			String username) {
 		String connectionString = "jdbc:postgresql://%s:%s/%s".formatted(host, port, database);
 		return DriverManager.getConnection(connectionString, username, null);
 	}
@@ -46,8 +46,10 @@ public class Controller {
 					@OpenApiContent(from = UserCreationRequest.class)}),
 			methods = HttpMethod.PUT,
 			responses = {
-					@OpenApiResponse(status = "200", content = {@OpenApiContent(from = UserCreationResponse.class)} ),
-					@OpenApiResponse(status = "400", content = {@OpenApiContent(from = ErrorResponse.class)})
+					@OpenApiResponse(status = "200", content = {
+							@OpenApiContent(from = UserCreationResponse.class)}),
+					@OpenApiResponse(status = "400", content = {
+							@OpenApiContent(from = ErrorResponse.class)})
 			}
 	)
 	public static void createUser(Context ctx) {
@@ -85,8 +87,10 @@ public class Controller {
 					@OpenApiParam(name = "userId", type = String.class, description = "ID of the user")
 			},
 			responses = {
-					@OpenApiResponse(status = "200", content = {@OpenApiContent(from = UserFetchResponse.class)} ),
-					@OpenApiResponse(status = "400", content = {@OpenApiContent(from = ErrorResponse.class)})
+					@OpenApiResponse(status = "200", content = {
+							@OpenApiContent(from = UserFetchResponse.class)}),
+					@OpenApiResponse(status = "400", content = {
+							@OpenApiContent(from = ErrorResponse.class)})
 			}
 	)
 	public static void retrieveUser(Context ctx) {
@@ -101,7 +105,7 @@ public class Controller {
 					.where(field("id").eq(parsedId))
 					.fetchAnyInto(UserEntity.class);
 
-			if (user == null){
+			if (user == null) {
 				throw new UserNotFoundException();
 			}
 

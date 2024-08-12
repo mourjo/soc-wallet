@@ -9,8 +9,9 @@ import web.controller.dto.ErrorResponse;
 
 @Slf4j
 public class ExceptionHandler {
+
 	public static void handleException(Exception e, Context context) {
-		switch(e) {
+		switch (e) {
 			case WalletException exp -> handleWalletException(exp, context);
 			case NumberFormatException nfe -> handleNumberFormatExceptionException(nfe, context);
 			default -> handleGenericExection(e, context);
@@ -19,7 +20,8 @@ public class ExceptionHandler {
 
 	private static void handleGenericExection(Exception e, Context context) {
 		log.error("Error: {}", e.getMessage(), e);
-		context.json(ErrorResponse.build(e.getMessage(), Map.of("exception_class", e.getClass().toString())));
+		context.json(ErrorResponse.build(e.getMessage(),
+				Map.of("exception_class", e.getClass().toString())));
 		context.status(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
@@ -28,7 +30,8 @@ public class ExceptionHandler {
 		context.status(e.getStatus());
 	}
 
-	private static void handleNumberFormatExceptionException(NumberFormatException e, Context context) {
+	private static void handleNumberFormatExceptionException(NumberFormatException e,
+			Context context) {
 		context.json(ErrorResponse.build("Invalid number in request"));
 		context.status(HttpStatus.BAD_REQUEST);
 	}
