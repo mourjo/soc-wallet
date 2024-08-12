@@ -14,11 +14,11 @@ public class ExceptionHandler {
 		switch (e) {
 			case WalletException exp -> handleWalletException(exp, context);
 			case NumberFormatException nfe -> handleNumberFormatExceptionException(nfe, context);
-			default -> handleGenericExection(e, context);
+			default -> handleGenericException(e, context);
 		}
 	}
 
-	private static void handleGenericExection(Exception e, Context context) {
+	private static void handleGenericException(Exception e, Context context) {
 		log.error("Error: {}", e.getMessage(), e);
 		context.json(ErrorResponse.build(e.getMessage(),
 				Map.of("exception_class", e.getClass().toString())));
