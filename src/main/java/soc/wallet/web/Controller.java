@@ -1,12 +1,13 @@
-package web.controller;
+package soc.wallet.web;
 
 import static org.jooq.impl.DSL.asterisk;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.table;
 
-import entities.UserEntity;
-import exceptions.UserAlreadyExistsException;
-import exceptions.UserNotFoundException;
+import soc.wallet.common.Environment;
+import soc.wallet.entities.UserEntity;
+import soc.wallet.exceptions.UserAlreadyExistsException;
+import soc.wallet.exceptions.UserNotFoundException;
 import io.javalin.http.Context;
 import io.javalin.openapi.HttpMethod;
 import io.javalin.openapi.OpenApi;
@@ -22,17 +23,20 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
-import web.controller.dto.ErrorResponse;
-import web.controller.dto.UserCreationRequest;
-import web.controller.dto.UserCreationResponse;
-import web.controller.dto.UserFetchResponse;
+import soc.wallet.web.dto.ErrorResponse;
+import soc.wallet.web.dto.UserCreationRequest;
+import soc.wallet.web.dto.UserCreationResponse;
+import soc.wallet.web.dto.UserFetchResponse;
 
 @Slf4j
 public class Controller {
 
 	@SneakyThrows
-	private static Connection getConnection(String host, String port, String database,
-			String username) {
+	private static Connection getConnection() {
+		String host = Environment.postgresHost();
+		String port = Environment.postgresPort();
+		String database = Environment.postgresDatabase();
+		String username = Environment.postgresUser();
 		String connectionString = "jdbc:postgresql://%s:%s/%s".formatted(host, port, database);
 		return DriverManager.getConnection(connectionString, username, null);
 	}
@@ -46,7 +50,7 @@ public class Controller {
 					@OpenApiContent(from = UserCreationRequest.class)}),
 			methods = HttpMethod.PUT,
 			responses = {
-					@OpenApiResponse(status = "200", content = {
+					@OpenApiResponse(status = "201", content = {
 							@OpenApiContent(from = UserCreationResponse.class)}),
 					@OpenApiResponse(status = "400", content = {
 							@OpenApiContent(from = ErrorResponse.class)})
@@ -54,8 +58,7 @@ public class Controller {
 	)
 	public static void createUser(Context ctx) {
 		var request = ctx.bodyAsClass(UserCreationRequest.class);
-
-		try (Connection conn = getConnection("localhost", "5432", "soc_wallet_db", "justin")) {
+		try (Connection conn = getConnection()) {
 			DSL.using(conn, SQLDialect.POSTGRES)
 					.transaction(trx -> {
 						Long userId = trx.dsl()
@@ -72,7 +75,7 @@ public class Controller {
 
 						ctx.json(new UserCreationResponse(userId,
 								DateTimeFormatter.ISO_DATE_TIME.format(OffsetDateTime.now())));
-						ctx.status(200);
+						ctx.status(201);
 					});
 		}
 	}
@@ -97,8 +100,7 @@ public class Controller {
 		String requestedId = ctx.pathParam("userId");
 		long parsedId = Long.parseLong(requestedId);
 
-		try (Connection conn = getConnection("localhost", "5432", "soc_wallet_db", "justin")) {
-
+		try (Connection conn = getConnection()) {
 			UserEntity user = DSL.using(conn, SQLDialect.POSTGRES)
 					.select(asterisk())
 					.from(table("users"))

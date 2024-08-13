@@ -1,6 +1,6 @@
-package web.controller.dto;
+package soc.wallet.web.dto;
 
-import entities.UserEntity;
+import soc.wallet.entities.UserEntity;
 import java.time.format.DateTimeFormatter;
 
 public record UserFetchResponse(long id, String name, String email, String createdAt) {

@@ -1,4 +1,4 @@
-package entities;
+package soc.wallet.entities;
 
 import jakarta.persistence.Column;
 import java.time.OffsetDateTime;

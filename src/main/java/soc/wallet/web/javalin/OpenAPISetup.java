@@ -1,4 +1,4 @@
-package web.controller.javalin;
+package soc.wallet.web.javalin;
 
 import io.javalin.config.JavalinConfig;
 import io.javalin.openapi.plugin.OpenApiPlugin;

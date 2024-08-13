@@ -1,11 +1,11 @@
-package web.controller.javalin;
+package soc.wallet.web.javalin;
 
-import exceptions.WalletException;
+import soc.wallet.exceptions.WalletException;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import web.controller.dto.ErrorResponse;
+import soc.wallet.web.dto.ErrorResponse;
 
 @Slf4j
 public class ExceptionHandler {

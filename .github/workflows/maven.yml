@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ "*" ]
 
+env:
+  PG_DB: soc_wallet_test_db
+
+
 jobs:
   build:
     runs-on: ubuntu-latest

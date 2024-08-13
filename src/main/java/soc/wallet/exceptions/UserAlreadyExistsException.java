@@ -1,7 +1,7 @@
-package exceptions;
+package soc.wallet.exceptions;
 
 import io.javalin.http.HttpStatus;
-import web.controller.dto.ErrorResponse;
+import soc.wallet.web.dto.ErrorResponse;
 
 public class UserAlreadyExistsException extends WalletException {
 
