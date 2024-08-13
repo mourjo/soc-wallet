@@ -5,25 +5,18 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class Environment {
+
+	private static Environment env = null;
 	String postgresHost;
 	String posgresPort;
 	String postgresUser;
 	String postgresDatabase;
 	int serverPort;
 
-	private static Environment env = null;
-
-	public static Environment getInstance() {
-		if (env == null) {
-			env = new Environment();
-		}
-		return env;
-	}
-
 	private Environment() {
 		postgresHost = getEnv("PG_HOST", "localhost");
 		posgresPort = getEnv("PG_PORT", "5432");
-		postgresUser =getEnv("PG_USER", "justin");
+		postgresUser = getEnv("PG_USER", "justin");
 		postgresDatabase = getEnv("PG_DB", "soc_wallet_db");
 
 		String defaultPort = "8818";
@@ -35,6 +28,13 @@ public class Environment {
 		} finally {
 			serverPort = Integer.parseInt(defaultPort);
 		}
+	}
+
+	public static Environment getInstance() {
+		if (env == null) {
+			env = new Environment();
+		}
+		return env;
 	}
 
 	public static String getPostgresHost() {

@@ -4,7 +4,7 @@
 
 - `PG_HOST` defaults to `localhost`
 - `PG_PORT` defaults to `5432`
-- `PG_USER` defaults to `justin` 
+- `PG_USER` defaults to `justin`
 - `PG_DB` defaults to `soc_wallet_db`
 - `SERVER_PORT` defaults to `8818`
 
@@ -27,6 +27,7 @@ java -cp target/soc-wallet-1.0-SNAPSHOT.jar soc.wallet.web.Launcher
 ```
 
 ## Running tests
+
 ```bash
 PG_DB=soc_wallet_test_db mvn test
 ```

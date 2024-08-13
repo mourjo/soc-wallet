@@ -1,10 +1,10 @@
 package soc.wallet.web.javalin;
 
-import soc.wallet.exceptions.WalletException;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import soc.wallet.exceptions.WalletException;
 import soc.wallet.web.dto.ErrorResponse;
 
 @Slf4j

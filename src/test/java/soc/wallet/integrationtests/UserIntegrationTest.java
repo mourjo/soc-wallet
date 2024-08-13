@@ -4,7 +4,6 @@ import io.javalin.Javalin;
 import io.javalin.testtools.JavalinTest;
 import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import soc.wallet.web.Launcher;
 import soc.wallet.web.dto.UserCreationRequest;
@@ -34,7 +33,7 @@ public class UserIntegrationTest {
 		JavalinTest.test(app, (server, client) -> {
 			Assertions.assertEquals(201,
 					client.put("/user", new UserCreationRequest(email, name)).code());
-			
+
 			var response = client.put("/user", new UserCreationRequest(email, name));
 			Assertions.assertEquals(409, response.code());
 			var body = TypeConversion.toErrorResponse(response);
