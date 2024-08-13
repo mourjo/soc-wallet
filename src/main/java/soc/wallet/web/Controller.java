@@ -32,11 +32,11 @@ import soc.wallet.web.dto.UserFetchResponse;
 public class Controller {
 
 	@SneakyThrows
-	private static Connection getConnection() {
-		String host = Environment.postgresHost();
-		String port = Environment.postgresPort();
-		String database = Environment.postgresDatabase();
-		String username = Environment.postgresUser();
+	private Connection getConnection() {
+		String host = Environment.getPostgresHost();
+		String port = Environment.getPosgresPort();
+		String database = Environment.getPostgresDatabase();
+		String username = Environment.getPostgresUser();
 		String connectionString = "jdbc:postgresql://%s:%s/%s".formatted(host, port, database);
 		return DriverManager.getConnection(connectionString, username, null);
 	}
@@ -56,7 +56,7 @@ public class Controller {
 							@OpenApiContent(from = ErrorResponse.class)})
 			}
 	)
-	public static void createUser(Context ctx) {
+	public void createUser(Context ctx) {
 		var request = ctx.bodyAsClass(UserCreationRequest.class);
 		try (Connection conn = getConnection()) {
 			DSL.using(conn, SQLDialect.POSTGRES)
@@ -96,7 +96,7 @@ public class Controller {
 							@OpenApiContent(from = ErrorResponse.class)})
 			}
 	)
-	public static void retrieveUser(Context ctx) {
+	public void retrieveUser(Context ctx) {
 		String requestedId = ctx.pathParam("userId");
 		long parsedId = Long.parseLong(requestedId);
 

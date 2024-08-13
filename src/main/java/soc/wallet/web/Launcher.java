@@ -10,13 +10,15 @@ import soc.wallet.web.javalin.OpenAPISetup;
 public class Launcher {
 
 	public static void main(String[] args) {
-		buildApp().start(Environment.serverPort());
+		buildApp().start(Environment.getServerPort());
 	}
 
 	public static Javalin buildApp() {
+		final Controller controller = new Controller();
+
 		return Javalin.create(OpenAPISetup::registerPlugins)
-				.put("/user", Controller::createUser)
-				.get("/user/{userId}", Controller::retrieveUser)
+				.put("/user", controller::createUser)
+				.get("/user/{userId}", controller::retrieveUser)
 				.exception(Exception.class, ExceptionHandler::handleException);
 	}
 }

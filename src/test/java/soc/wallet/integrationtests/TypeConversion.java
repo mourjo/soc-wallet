@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import io.javalin.json.JavalinJackson;
 import lombok.SneakyThrows;
 import okhttp3.Response;
+import soc.wallet.web.dto.ErrorResponse;
 import soc.wallet.web.dto.UserCreationResponse;
 import soc.wallet.web.dto.UserFetchResponse;
 
@@ -19,6 +20,12 @@ public class TypeConversion {
 	@SneakyThrows
 	public static UserFetchResponse toUserFetchResponse(Response response) {
 		var typeRef = new TypeReference<UserFetchResponse>(){};
+		return jackson.fromJsonString(response.body().string(), typeRef.getType());
+	}
+
+	@SneakyThrows
+	public static ErrorResponse toErrorResponse(Response response) {
+		var typeRef = new TypeReference<ErrorResponse>(){};
 		return jackson.fromJsonString(response.body().string(), typeRef.getType());
 	}
 

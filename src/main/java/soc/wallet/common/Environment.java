@@ -1,38 +1,65 @@
 package soc.wallet.common;
 
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class Environment {
+	String postgresHost;
+	String posgresPort;
+	String postgresUser;
+	String postgresDatabase;
+	int serverPort;
 
-	public static String postgresHost() {
-		return getEnv("PG_HOST").orElse("localhost");
+	private static Environment env = null;
+
+	public static Environment getInstance() {
+		if (env == null) {
+			env = new Environment();
+		}
+		return env;
 	}
 
-	public static String postgresPort() {
-		return getEnv("PG_PORT").orElse("5432");
+	private Environment() {
+		postgresHost = getEnv("PG_HOST", "localhost");
+		posgresPort = getEnv("PG_PORT", "5432");
+		postgresUser =getEnv("PG_USER", "justin");
+		postgresDatabase = getEnv("PG_DB", "soc_wallet_db");
+
+		String defaultPort = "8818";
+		String port = getEnv("SERVER_PORT", defaultPort);
+		try {
+			serverPort = Integer.parseInt(port);
+		} catch (NumberFormatException e) {
+			log.warn("Illegal port, falling back to default port {}", defaultPort);
+		} finally {
+			serverPort = Integer.parseInt(defaultPort);
+		}
 	}
 
-	public static String postgresUser() {
-		return getEnv("PG_USER").orElse("justin");
+	public static String getPostgresHost() {
+		return getInstance().postgresHost;
 	}
 
-	public static String postgresDatabase() {
-		return getEnv("PG_DB").orElse("soc_wallet_db");
+	public static String getPosgresPort() {
+		return getInstance().posgresPort;
 	}
 
-	public static int serverPort() {
-		return getEnv("SERVER_PORT")
-				.map(s -> {
-					try {
-						return Integer.parseInt(s);
-					} catch (NumberFormatException e) {
-						return null;
-					}
-				})
-				.orElse(8818);
+	public static String getPostgresUser() {
+		return getInstance().postgresUser;
 	}
 
-	private static Optional<String> getEnv(String environmentVar) {
-		return Optional.ofNullable(System.getenv(environmentVar));
+	public static String getPostgresDatabase() {
+		return getInstance().postgresDatabase;
+	}
+
+	public static int getServerPort() {
+		return getInstance().serverPort;
+	}
+
+	private static String getEnv(String environmentVar, String fallback) {
+		String value = Optional.ofNullable(System.getenv(environmentVar)).orElse(fallback);
+		log.info("Using environment variable {}={}", environmentVar, value);
+		return value;
 	}
 }
