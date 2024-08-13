@@ -32,7 +32,9 @@ public class UserIntegrationTest {
 		String name = "Joe";
 
 		JavalinTest.test(app, (server, client) -> {
-			Assertions.assertEquals(201, client.put("/user", new UserCreationRequest(email, name)).code());
+			Assertions.assertEquals(201,
+					client.put("/user", new UserCreationRequest(email, name)).code());
+			
 			var response = client.put("/user", new UserCreationRequest(email, name));
 			Assertions.assertEquals(409, response.code());
 			var body = TypeConversion.toErrorResponse(response);
