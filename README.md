@@ -1,4 +1,5 @@
 # soc-wallet
+[![Maven Build with Docker](https://github.com/mourjo/soc-wallet/actions/workflows/maven.yml/badge.svg)](https://github.com/mourjo/soc-wallet/actions/workflows/maven.yml)
 
 ## Environment variables
 
@@ -31,3 +32,4 @@ java -cp target/soc-wallet-1.0-SNAPSHOT.jar soc.wallet.web.Launcher
 ```bash
 PG_DB=soc_wallet_test_db mvn test
 ```
+See also: [Github Action file](.github/workflows/maven.yml)
