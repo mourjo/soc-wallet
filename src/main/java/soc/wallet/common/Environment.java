@@ -1,5 +1,11 @@
 package soc.wallet.common;
 
+import static soc.wallet.common.Constants.API_SECRET_ENV_VAR;
+import static soc.wallet.common.Constants.PG_DB_ENV_VAR;
+import static soc.wallet.common.Constants.PG_HOST_ENV;
+import static soc.wallet.common.Constants.PG_PORT_ENV_VAR;
+import static soc.wallet.common.Constants.PG_USER_ENV_VAR;
+
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,11 +21,11 @@ public class Environment {
 	private final String apiSecret;
 
 	private Environment() {
-		postgresHost = getEnv("PG_HOST", "localhost");
-		postgresPort = getEnv("PG_PORT", "5432");
-		postgresUser = getEnv("PG_USER", "justin");
-		postgresDatabase = getEnv("PG_DB", "soc_wallet_db");
-		apiSecret = getEnv("API_SECRET", "noauth");
+		postgresHost = getEnv(PG_HOST_ENV, "localhost");
+		postgresPort = getEnv(PG_PORT_ENV_VAR, "5432");
+		postgresUser = getEnv(PG_USER_ENV_VAR, "justin");
+		postgresDatabase = getEnv(PG_DB_ENV_VAR, "soc_wallet_db");
+		apiSecret = getEnv(API_SECRET_ENV_VAR, "no_auth");
 
 		String defaultPort = "8818";
 		int port;
@@ -28,7 +34,6 @@ public class Environment {
 		} catch (NumberFormatException e) {
 			log.warn("Illegal port, falling back to default port {}", defaultPort);
 			port = Integer.parseInt(defaultPort);
-		} finally {
 		}
 		serverPort = port;
 	}
@@ -57,7 +62,7 @@ public class Environment {
 	}
 
 	public static String getApiSecret() {
-		return getInstance().postgresDatabase;
+		return getInstance().apiSecret;
 	}
 
 	public static int getServerPort() {
@@ -66,7 +71,7 @@ public class Environment {
 
 	private static String getEnv(String environmentVar, String fallback) {
 		String value = Optional.ofNullable(System.getenv(environmentVar)).orElse(fallback);
-		log.debug("Using environment variable {}={}", environmentVar, value);
+		log.info("Using environment variable {}={}", environmentVar, value);
 		return value;
 	}
 }

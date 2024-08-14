@@ -8,6 +8,7 @@ on:
 
 env:
   PG_DB: soc_wallet_test_db
+  AUTH_TOKEN: humpty_dumpty
 
 
 jobs:

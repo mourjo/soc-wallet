@@ -3,8 +3,10 @@ package soc.wallet.web;
 import static org.jooq.impl.DSL.asterisk;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.table;
+import static soc.wallet.common.Constants.AUTH_HEADER_NAME;
 
 import io.javalin.http.Context;
+import io.javalin.http.HttpStatus;
 import io.javalin.openapi.HttpMethod;
 import io.javalin.openapi.OpenApi;
 import io.javalin.openapi.OpenApiContent;
@@ -21,6 +23,7 @@ import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import soc.wallet.common.Environment;
 import soc.wallet.entities.UserEntity;
+import soc.wallet.exceptions.UnauthenticatedRequest;
 import soc.wallet.exceptions.UserAlreadyExistsException;
 import soc.wallet.exceptions.UserNotFoundException;
 import soc.wallet.web.dto.ErrorResponse;
@@ -49,6 +52,7 @@ public class Controller {
 			requestBody = @OpenApiRequestBody(required = true, content = {
 					@OpenApiContent(from = UserCreationRequest.class)}),
 			methods = HttpMethod.PUT,
+			headers = {@OpenApiParam(name=AUTH_HEADER_NAME, required = true, description = "Authentication Token")},
 			responses = {
 					@OpenApiResponse(status = "201", content = {
 							@OpenApiContent(from = UserCreationResponse.class)}),
@@ -57,6 +61,9 @@ public class Controller {
 			}
 	)
 	public void createUser(Context ctx) {
+		if (!Environment.getApiSecret().equals(ctx.header(AUTH_HEADER_NAME))) {
+			throw new UnauthenticatedRequest();
+		}
 		var request = ctx.bodyAsClass(UserCreationRequest.class);
 		try (Connection conn = getConnection()) {
 			DSL.using(conn, SQLDialect.POSTGRES)
@@ -75,7 +82,7 @@ public class Controller {
 
 						ctx.json(new UserCreationResponse(userId,
 								DateTimeFormatter.ISO_DATE_TIME.format(OffsetDateTime.now())));
-						ctx.status(201);
+						ctx.status(HttpStatus.CREATED);
 					});
 		}
 	}
@@ -111,8 +118,12 @@ public class Controller {
 				throw new UserNotFoundException();
 			}
 
+			if (!Environment.getApiSecret().equals(ctx.header(AUTH_HEADER_NAME))) {
+				throw new UnauthenticatedRequest();
+			}
+
 			ctx.json(UserFetchResponse.build(user));
-			ctx.status(200);
+			ctx.status(HttpStatus.OK);
 		}
 	}
 
