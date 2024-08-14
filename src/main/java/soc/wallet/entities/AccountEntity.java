@@ -25,7 +25,7 @@ public class AccountEntity {
 	@Column(name = "currency")
 	String currency;
 
-	@Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+	@Column(name = "created_at")
 	OffsetDateTime createdAt;
 
 	public AccountEntity() {

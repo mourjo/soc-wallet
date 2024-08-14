@@ -28,13 +28,6 @@ public class UserEntity {
 
 	}
 
-	public UserEntity(long id, String name, String email, OffsetDateTime createdAt) {
-		this.id = id;
-		this.name = name;
-		this.email = email;
-		this.createdAt = createdAt;
-	}
-
 	public static Field<Long> idField() {
 		return DSL.field("id", Long.class);
 	}

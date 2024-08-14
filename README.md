@@ -31,6 +31,7 @@ API_SECRET=humpty_dumpty ./mvnw clean compile exec:java  -Dexec.mainClass="soc.w
 ```
 
 ## Accessing the API
+
 There is a Swagger page that will provide details about the individual APIs
 http://localhost:8818/swagger-ui
 
