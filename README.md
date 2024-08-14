@@ -30,6 +30,10 @@ API_SECRET=humpty_dumpty java -cp target/soc-wallet-1.0-SNAPSHOT.jar soc.wallet.
 API_SECRET=humpty_dumpty ./mvnw clean compile exec:java  -Dexec.mainClass="soc.wallet.web.Launcher"
 ```
 
+## Accessing the API
+There is a Swagger page that will provide details about the individual APIs
+http://localhost:8818/swagger-ui
+
 ## Running tests
 
 ```bash
