@@ -7,27 +7,30 @@ import lombok.extern.slf4j.Slf4j;
 public class Environment {
 
 	private static Environment env = null;
-	String postgresHost;
-	String posgresPort;
-	String postgresUser;
-	String postgresDatabase;
-	int serverPort;
+	private final String postgresHost;
+	private final String postgresPort;
+	private final String postgresUser;
+	private final String postgresDatabase;
+	private final int serverPort;
+	private final String apiSecret;
 
 	private Environment() {
 		postgresHost = getEnv("PG_HOST", "localhost");
-		posgresPort = getEnv("PG_PORT", "5432");
+		postgresPort = getEnv("PG_PORT", "5432");
 		postgresUser = getEnv("PG_USER", "justin");
 		postgresDatabase = getEnv("PG_DB", "soc_wallet_db");
+		apiSecret = getEnv("API_SECRET", "noauth");
 
 		String defaultPort = "8818";
-		String port = getEnv("SERVER_PORT", defaultPort);
+		int port;
 		try {
-			serverPort = Integer.parseInt(port);
+			port = Integer.parseInt(getEnv("SERVER_PORT", defaultPort));
 		} catch (NumberFormatException e) {
 			log.warn("Illegal port, falling back to default port {}", defaultPort);
+			port = Integer.parseInt(defaultPort);
 		} finally {
-			serverPort = Integer.parseInt(defaultPort);
 		}
+		serverPort = port;
 	}
 
 	public static Environment getInstance() {
@@ -41,8 +44,8 @@ public class Environment {
 		return getInstance().postgresHost;
 	}
 
-	public static String getPosgresPort() {
-		return getInstance().posgresPort;
+	public static String getPostgresPort() {
+		return getInstance().postgresPort;
 	}
 
 	public static String getPostgresUser() {
@@ -53,13 +56,17 @@ public class Environment {
 		return getInstance().postgresDatabase;
 	}
 
+	public static String getApiSecret() {
+		return getInstance().postgresDatabase;
+	}
+
 	public static int getServerPort() {
 		return getInstance().serverPort;
 	}
 
 	private static String getEnv(String environmentVar, String fallback) {
 		String value = Optional.ofNullable(System.getenv(environmentVar)).orElse(fallback);
-		log.info("Using environment variable {}={}", environmentVar, value);
+		log.debug("Using environment variable {}={}", environmentVar, value);
 		return value;
 	}
 }

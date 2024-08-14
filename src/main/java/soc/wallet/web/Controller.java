@@ -34,7 +34,7 @@ public class Controller {
 	@SneakyThrows
 	private Connection getConnection() {
 		String host = Environment.getPostgresHost();
-		String port = Environment.getPosgresPort();
+		String port = Environment.getPostgresPort();
 		String database = Environment.getPostgresDatabase();
 		String username = Environment.getPostgresUser();
 		String connectionString = "jdbc:postgresql://%s:%s/%s".formatted(host, port, database);

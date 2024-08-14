@@ -8,6 +8,7 @@
 - `PG_USER` defaults to `justin`
 - `PG_DB` defaults to `soc_wallet_db`
 - `SERVER_PORT` defaults to `8818`
+- `API_SECRET` defaults to `noauth` - this is a value that needs to be passed in every request (a placeholder for identifying authenticated clients)
 
 ## Compiling with Maven
 
