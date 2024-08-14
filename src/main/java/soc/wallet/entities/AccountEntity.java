@@ -1,14 +1,16 @@
 package soc.wallet.entities;
 
+import static org.jooq.impl.DSL.field;
+import static org.jooq.impl.DSL.table;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.time.OffsetDateTime;
-import soc.wallet.web.dto.SupportedCurrency;
+import org.jooq.Field;
+import org.jooq.Record;
+import org.jooq.impl.DSL;
 
 @Entity
 @Table(name = "accounts")
@@ -80,5 +82,29 @@ public class AccountEntity {
 
 	public OffsetDateTime getCreatedAt() {
 		return createdAt;
+	}
+
+	public static Field<Long> idField() {
+		return DSL.field("id", Long.class);
+	}
+
+	public static Field<String> currencyField() {
+		return DSL.field("currency", String.class);
+	}
+
+	public static Field<Long> userIdField() {
+		return DSL.field("user_id", Long.class);
+	}
+
+	public static Field<OffsetDateTime> createdAtField() {
+		return DSL.field("created_at", OffsetDateTime.class);
+	}
+
+	public static Field<BigDecimal> balanceField() {
+		return DSL.field("balance", BigDecimal.class);
+	}
+
+	public static org.jooq.Table<Record> table() {
+		return DSL.table("accounts");
 	}
 }

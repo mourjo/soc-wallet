@@ -21,10 +21,8 @@ import java.time.format.DateTimeFormatter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.SQLDialect;
-import org.jooq.conf.Settings;
 import org.jooq.exception.IntegrityConstraintViolationException;
 import org.jooq.impl.DSL;
-import org.jooq.meta.jaxb.Generate;
 import soc.wallet.common.Environment;
 import soc.wallet.entities.AccountEntity;
 import soc.wallet.entities.UserEntity;
@@ -35,7 +33,6 @@ import soc.wallet.exceptions.UserNotFoundException;
 import soc.wallet.web.dto.AccountCreationRequest;
 import soc.wallet.web.dto.AccountCreationResponse;
 import soc.wallet.web.dto.ErrorResponse;
-import soc.wallet.web.dto.SupportedCurrency;
 import soc.wallet.web.dto.UserCreationRequest;
 import soc.wallet.web.dto.UserCreationResponse;
 import soc.wallet.web.dto.UserFetchResponse;
@@ -81,11 +78,18 @@ public class Controller {
 			DSL.using(conn, SQLDialect.POSTGRES)
 					.transaction(trx -> {
 						UserEntity user = trx.dsl()
-								.insertInto(table("users"))
-								.columns(field("name"), field("email"))
-								.values(request.name(), request.email())
+								.insertInto(UserEntity.table())
+								.columns(
+										UserEntity.nameField(),
+										UserEntity.emailField()
+								).values(request.name(), request.email())
 								.onConflictDoNothing()
-								.returningResult(field("id"), field("email"), field("name"), field("created_at", OffsetDateTime.class))
+								.returningResult(
+										UserEntity.idField(),
+										UserEntity.emailField(),
+										UserEntity.nameField(),
+										UserEntity.createdAtField()
+								)
 								.fetchAnyInto(UserEntity.class);
 
 						if (user == null) {
@@ -124,8 +128,8 @@ public class Controller {
 		try (Connection conn = getConnection()) {
 			UserEntity user = DSL.using(conn, SQLDialect.POSTGRES)
 					.select(asterisk())
-					.from(table("users"))
-					.where(field("id").eq(parsedId))
+					.from(UserEntity.table())
+					.where(UserEntity.idField().eq(parsedId))
 					.fetchAnyInto(UserEntity.class);
 
 			if (user == null) {
@@ -171,21 +175,34 @@ public class Controller {
 					.transaction(trx -> {
 						try {
 							var account = trx.dsl()
-									.insertInto(table("accounts"))
-									.columns(field("user_id"), field("currency"), field("balance"))
-									.values(request.userId(), request.currency().toString(),
-											new BigDecimal(0))
-									.returningResult(field("user_id"),
-											field("balance"), field("currency"),
-											field("created_at", OffsetDateTime.class),
-											field("id"))
+									.insertInto(AccountEntity.table())
+									.columns(
+											AccountEntity.userIdField(),
+											AccountEntity.currencyField(),
+											AccountEntity.balanceField()
+									).values(
+											request.userId(),
+											request.currency().toString(),
+											new BigDecimal(0)
+									).returningResult(
+											AccountEntity.userIdField(),
+											AccountEntity.balanceField(),
+											AccountEntity.currencyField(),
+											AccountEntity.createdAtField(),
+											AccountEntity.idField()
+									)
 									.fetchAnyInto(AccountEntity.class);
 
 							var user = trx.dsl()
-									.select(field("created_at", OffsetDateTime.class), field("id", Long.class), field("email", String.class), field("name", String.class))
-									.from(table("users"))
-									.where(field("id").eq(account.getUserId()))
-									.fetchOneInto(UserEntity.class);
+									.select(
+											UserEntity.createdAtField(),
+											UserEntity.idField(),
+											UserEntity.emailField(),
+											UserEntity.nameField()
+									).from(UserEntity.table())
+									.where(
+											UserEntity.idField().eq(account.getUserId())
+									).fetchOneInto(UserEntity.class);
 
 							ctx.json(new AccountCreationResponse(
 									account.getId(),
