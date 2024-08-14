@@ -52,7 +52,8 @@ public class Controller {
 			requestBody = @OpenApiRequestBody(required = true, content = {
 					@OpenApiContent(from = UserCreationRequest.class)}),
 			methods = HttpMethod.PUT,
-			headers = {@OpenApiParam(name=AUTH_HEADER_NAME, required = true, description = "Authentication Token")},
+			headers = {
+					@OpenApiParam(name = AUTH_HEADER_NAME, required = true, description = "Authentication Token")},
 			responses = {
 					@OpenApiResponse(status = "201", content = {
 							@OpenApiContent(from = UserCreationResponse.class)}),

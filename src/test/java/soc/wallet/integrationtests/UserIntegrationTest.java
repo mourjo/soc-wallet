@@ -18,6 +18,11 @@ public class UserIntegrationTest {
 
 	final Javalin app = Launcher.buildApp();
 
+	@NotNull
+	private static Consumer<Builder> headers() {
+		return req -> req.header(AUTH_HEADER_NAME, Environment.getApiSecret());
+	}
+
 	@Test
 	void createUser() {
 		String email = UUID.randomUUID() + "@gmail.com";
@@ -29,11 +34,6 @@ public class UserIntegrationTest {
 			var body = TypeConversion.toUserCreationResponse(response);
 			Assertions.assertTrue(body.id() > 0);
 		});
-	}
-
-	@NotNull
-	private static Consumer<Builder> headers() {
-		return req -> req.header(AUTH_HEADER_NAME, Environment.getApiSecret());
 	}
 
 	@Test

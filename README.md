@@ -1,4 +1,5 @@
 # soc-wallet
+
 [![Maven Build with Docker](https://github.com/mourjo/soc-wallet/actions/workflows/maven.yml/badge.svg)](https://github.com/mourjo/soc-wallet/actions/workflows/maven.yml)
 
 ## Environment variables
@@ -8,7 +9,8 @@
 - `PG_USER` defaults to `justin`
 - `PG_DB` defaults to `soc_wallet_db`
 - `SERVER_PORT` defaults to `8818`
-- `API_SECRET` defaults to `no_auth` - this is a value that needs to be passed in every request (a placeholder for identifying authenticated clients)
+- `API_SECRET` defaults to `no_auth` - this is a value that needs to be passed in every request (a
+  placeholder for identifying authenticated clients)
 
 ## Compiling with Maven
 
@@ -31,6 +33,7 @@ API_SECRET=humpty_dumpty ./mvnw clean compile exec:java  -Dexec.mainClass="soc.w
 ## Running tests
 
 ```bash
-PG_DB=soc_wallet_test_db mvn test
+API_SECRET=humpty_dumpty PG_DB=soc_wallet_test_db mvn test
 ```
+
 See also: [Github Action file](.github/workflows/maven.yml)
