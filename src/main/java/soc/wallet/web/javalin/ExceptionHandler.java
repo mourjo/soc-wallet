@@ -15,7 +15,8 @@ public class ExceptionHandler {
 		switch (e) {
 			case WalletException exp -> handleWalletException(exp, context);
 			case NumberFormatException nfe -> handleNumberFormatExceptionException(nfe, context);
-			case IntegrityConstraintViolationException icve -> handleIntegrityConstraintViolationException(icve, context);
+			case IntegrityConstraintViolationException icve ->
+					handleIntegrityConstraintViolationException(icve, context);
 			default -> handleGenericException(e, context);
 		}
 	}

@@ -1,8 +1,5 @@
 package soc.wallet.entities;
 
-import static org.jooq.impl.DSL.field;
-import static org.jooq.impl.DSL.table;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -15,6 +12,7 @@ import org.jooq.impl.DSL;
 @Entity
 @Table(name = "accounts")
 public class AccountEntity {
+
 	@Column(name = "id")
 	long id;
 
@@ -31,57 +29,6 @@ public class AccountEntity {
 	OffsetDateTime createdAt;
 
 	public AccountEntity() {
-	}
-
-	public long getId() {
-		return id;
-	}
-
-	public long getUserId() {
-		return userId;
-	}
-
-	public BigDecimal getBalance() {
-		return balance;
-	}
-
-	public String getCurrency() {
-		return currency;
-	}
-
-	@Override
-	public String toString() {
-		return "AccountEntity{" +
-				"id=" + id +
-				", userId='" + userId + '\'' +
-				", balance=" + balance +
-				", currency=" + currency +
-				", createdAt=" + createdAt +
-				'}';
-	}
-
-	public void setId(long id) {
-		this.id = id;
-	}
-
-	public void setUserId(long userId) {
-		this.userId = userId;
-	}
-
-	public void setBalance(BigDecimal balance) {
-		this.balance = balance;
-	}
-
-	public void setCurrency(String currency) {
-		this.currency = currency;
-	}
-
-	public void setCreatedAt(OffsetDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	public OffsetDateTime getCreatedAt() {
-		return createdAt;
 	}
 
 	public static Field<Long> idField() {
@@ -106,5 +53,56 @@ public class AccountEntity {
 
 	public static org.jooq.Table<Record> table() {
 		return DSL.table("accounts");
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	public long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(long userId) {
+		this.userId = userId;
+	}
+
+	public BigDecimal getBalance() {
+		return balance;
+	}
+
+	public void setBalance(BigDecimal balance) {
+		this.balance = balance;
+	}
+
+	public String getCurrency() {
+		return currency;
+	}
+
+	public void setCurrency(String currency) {
+		this.currency = currency;
+	}
+
+	@Override
+	public String toString() {
+		return "AccountEntity{" +
+				"id=" + id +
+				", userId='" + userId + '\'' +
+				", balance=" + balance +
+				", currency=" + currency +
+				", createdAt=" + createdAt +
+				'}';
+	}
+
+	public OffsetDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(OffsetDateTime createdAt) {
+		this.createdAt = createdAt;
 	}
 }

@@ -1,8 +1,6 @@
 package soc.wallet.web;
 
 import static org.jooq.impl.DSL.asterisk;
-import static org.jooq.impl.DSL.field;
-import static org.jooq.impl.DSL.table;
 import static soc.wallet.common.Constants.AUTH_HEADER_NAME;
 
 import io.javalin.http.Context;
@@ -16,7 +14,6 @@ import io.javalin.openapi.OpenApiResponse;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -209,7 +206,8 @@ public class Controller {
 									account.getUserId(),
 									account.getCurrency(),
 									user.getEmail(),
-									DateTimeFormatter.ISO_DATE_TIME.format(account.getCreatedAt())));
+									DateTimeFormatter.ISO_DATE_TIME.format(
+											account.getCreatedAt())));
 
 							ctx.status(HttpStatus.CREATED);
 						} catch (IntegrityConstraintViolationException ex) {
