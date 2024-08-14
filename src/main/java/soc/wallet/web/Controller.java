@@ -201,13 +201,7 @@ public class Controller {
 											UserEntity.idField().eq(account.getUserId())
 									).fetchOneInto(UserEntity.class);
 
-							ctx.json(new AccountCreationResponse(
-									account.getId(),
-									account.getUserId(),
-									account.getCurrency(),
-									user.getEmail(),
-									DateTimeFormatter.ISO_DATE_TIME.format(
-											account.getCreatedAt())));
+							ctx.json(AccountCreationResponse.build(account, user));
 
 							ctx.status(HttpStatus.CREATED);
 						} catch (IntegrityConstraintViolationException ex) {

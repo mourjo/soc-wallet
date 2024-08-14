@@ -9,6 +9,7 @@ import io.javalin.testtools.JavalinTest;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.time.OffsetDateTime;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -50,12 +51,29 @@ public class AccountIntegratonTest {
 		var userJill = insertUser("Jill");
 
 		JavalinTest.test(app, (server, client) -> {
+			for (SupportedCurrency currency : SupportedCurrency.values()) {
+				var response = client.put("/account",
+						new AccountCreationRequest(userJill.getId(), currency),
+						headers());
+				Assertions.assertEquals(201, response.code());
+				var body = TypeConversion.toAccountCreationResponse(response);
+				Assertions.assertTrue(body.id() > 0);
+				Assertions.assertEquals(userJill.getEmail(), body.userEmail());
+				Assertions.assertEquals("0.00", body.balance());
+				Assertions.assertEquals(currency.toString(), body.currency());
+			}
+		});
+	}
+
+	@Test
+	void createAccountUnsupportedCurrency() {
+		var userHellen = insertUser("Hellen");
+
+		JavalinTest.test(app, (server, client) -> {
 			var response = client.put("/account",
-					new AccountCreationRequest(userJill.getId(), SupportedCurrency.EUR), headers());
-			Assertions.assertEquals(201, response.code());
-			var body = TypeConversion.toAccountCreationResponse(response);
-			Assertions.assertTrue(body.id() > 0);
-			Assertions.assertEquals(userJill.getEmail(), body.userEmail());
+					Map.of("currency", "NOT A VALID CURRENCY", "userId", userHellen.getId()),
+					headers());
+			Assertions.assertEquals(400, response.code());
 		});
 	}
 
@@ -77,6 +95,18 @@ public class AccountIntegratonTest {
 		JavalinTest.test(app, (server, client) -> {
 			var response = client.put("/account",
 					new AccountCreationRequest(userMary.getId(), SupportedCurrency.EUR));
+			Assertions.assertEquals(401, response.code());
+		});
+	}
+
+	@Test
+	void badAuthTokenAccountCreation() {
+		var userMary = insertUser("Nelly");
+
+		JavalinTest.test(app, (server, client) -> {
+			var response = client.put("/account",
+					new AccountCreationRequest(userMary.getId(), SupportedCurrency.EUR),
+					req -> req.header(AUTH_HEADER_NAME, "BAD_VALUE"));
 			Assertions.assertEquals(401, response.code());
 		});
 	}

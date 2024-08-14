@@ -104,9 +104,33 @@ public class UserIntegrationTest {
 	}
 
 	@Test
+	void badAuthTokenCreation() {
+		String email = UUID.randomUUID() + "@gmail.com";
+		String name = "Jon";
+
+		JavalinTest.test(app, (server, client) -> {
+			var response = client.put("/user", new UserCreationRequest(email, name),
+					req -> req.header(AUTH_HEADER_NAME, "BAD_VALUE"));
+			Assertions.assertEquals(401, response.code());
+			var body = TypeConversion.toErrorResponse(response);
+			Assertions.assertEquals("Invalid Authentication", body.message());
+		});
+	}
+
+	@Test
 	void unauthenticatedFetch() {
 		JavalinTest.test(app, (server, client) -> {
 			var response = client.get("/user/1");
+			Assertions.assertEquals(401, response.code());
+			var body = TypeConversion.toErrorResponse(response);
+			Assertions.assertEquals("Invalid Authentication", body.message());
+		});
+	}
+
+	@Test
+	void badAuthTokenFetch() {
+		JavalinTest.test(app, (server, client) -> {
+			var response = client.get("/user/1", req -> req.header(AUTH_HEADER_NAME, "BAD_VALUE"));
 			Assertions.assertEquals(401, response.code());
 			var body = TypeConversion.toErrorResponse(response);
 			Assertions.assertEquals("Invalid Authentication", body.message());
