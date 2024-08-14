@@ -19,6 +19,7 @@ public class Launcher {
 		return Javalin.create(OpenAPISetup::registerPlugins)
 				.put("/user", controller::createUser)
 				.get("/user/{userId}", controller::retrieveUser)
+				.put("/account", controller::createAccount)
 				.exception(Exception.class, ExceptionHandler::handleException);
 	}
 }

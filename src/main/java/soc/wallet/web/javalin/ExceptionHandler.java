@@ -4,6 +4,7 @@ import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.jooq.exception.IntegrityConstraintViolationException;
 import soc.wallet.exceptions.WalletException;
 import soc.wallet.web.dto.ErrorResponse;
 
@@ -14,8 +15,16 @@ public class ExceptionHandler {
 		switch (e) {
 			case WalletException exp -> handleWalletException(exp, context);
 			case NumberFormatException nfe -> handleNumberFormatExceptionException(nfe, context);
+			case IntegrityConstraintViolationException icve -> handleIntegrityConstraintViolationException(icve, context);
 			default -> handleGenericException(e, context);
 		}
+	}
+
+	private static void handleIntegrityConstraintViolationException(
+			IntegrityConstraintViolationException e, Context context) {
+		log.error("Error: {}", e.getMessage(), e);
+		context.status(HttpStatus.BAD_REQUEST);
+		context.json(ErrorResponse.build("Invalid data"));
 	}
 
 	private static void handleGenericException(Exception e, Context context) {
