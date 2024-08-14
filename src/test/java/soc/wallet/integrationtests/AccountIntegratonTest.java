@@ -1,14 +1,11 @@
 package soc.wallet.integrationtests;
 
-import static org.jooq.impl.DSL.field;
-import static org.jooq.impl.DSL.table;
 import static soc.wallet.common.Constants.AUTH_HEADER_NAME;
 
 import io.javalin.Javalin;
 import io.javalin.testtools.JavalinTest;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -20,6 +17,8 @@ import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import soc.wallet.common.Environment;
 import soc.wallet.entities.UserEntity;
 import soc.wallet.web.Launcher;
@@ -46,22 +45,21 @@ public class AccountIntegratonTest {
 		return DriverManager.getConnection(connectionString, username, null);
 	}
 
-	@Test
-	void createAccount() {
+	@ParameterizedTest
+	@EnumSource(SupportedCurrency.class)
+	void createAccount(SupportedCurrency currency) {
 		var userJill = insertUser("Jill");
 
 		JavalinTest.test(app, (server, client) -> {
-			for (SupportedCurrency currency : SupportedCurrency.values()) {
-				var response = client.put("/account",
-						new AccountCreationRequest(userJill.getId(), currency),
-						headers());
-				Assertions.assertEquals(201, response.code());
-				var body = TypeConversion.toAccountCreationResponse(response);
-				Assertions.assertTrue(body.id() > 0);
-				Assertions.assertEquals(userJill.getEmail(), body.userEmail());
-				Assertions.assertEquals("0.00", body.balance());
-				Assertions.assertEquals(currency.toString(), body.currency());
-			}
+			var response = client.put("/account",
+					new AccountCreationRequest(userJill.getId(), currency),
+					headers());
+			Assertions.assertEquals(201, response.code());
+			var body = TypeConversion.toAccountCreationResponse(response);
+			Assertions.assertTrue(body.id() > 0);
+			Assertions.assertEquals(userJill.getEmail(), body.userEmail());
+			Assertions.assertEquals("0.00", body.balance());
+			Assertions.assertEquals(currency.toString(), body.currency());
 		});
 	}
 
@@ -120,11 +118,10 @@ public class AccountIntegratonTest {
 
 		try (Connection conn = getConnection()) {
 			return DSL.using(conn, SQLDialect.POSTGRES)
-					.insertInto(table("users"))
-					.columns(field("name"), field("email"))
+					.insertInto(UserEntity.table())
+					.columns(UserEntity.nameField(), UserEntity.emailField())
 					.values(name, email)
-					.returningResult(field("id"), field("name"), field("email"),
-							field("created_at", OffsetDateTime.class))
+					.returningResult(UserEntity.idField(), UserEntity.emailField())
 					.fetchAnyInto(UserEntity.class);
 		} catch (Exception e) {
 			e.printStackTrace();
