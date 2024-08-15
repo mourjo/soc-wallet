@@ -267,9 +267,10 @@ public class Controller {
 									).values(
 											amount,
 											request.source(),
-											request.accountId()
+											account.getId()
 									).returningResult(
 											ExternalTransfer.idField(),
+											ExternalTransfer.accountIdField(),
 											ExternalTransfer.createdAtField())
 									.fetchOneInto(ExternalTransfer.class);
 
