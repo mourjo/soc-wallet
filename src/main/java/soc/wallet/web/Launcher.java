@@ -20,6 +20,7 @@ public class Launcher {
 				.put("/user", controller::createUser)
 				.get("/user/{userId}", controller::retrieveUser)
 				.put("/account", controller::createAccount)
+				.post("/transfer/external", controller::createExternalTransfer)
 				.exception(Exception.class, ExceptionHandler::handleException);
 	}
 }

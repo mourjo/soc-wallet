@@ -20,7 +20,6 @@ public record AccountCreationResponse(
 				account.getCurrency(),
 				account.getBalance().toPlainString(),
 				user.getEmail(),
-				DateTimeFormatter.ISO_DATE_TIME.format(
-						account.getCreatedAt()));
+				DateTimeFormatter.ISO_DATE_TIME.format(account.getCreatedAt()));
 	}
 }

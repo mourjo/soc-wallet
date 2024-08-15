@@ -15,10 +15,13 @@ public class ExternalTransfer {
 
 	@Column(name = "account")
 	long accountId;
+
 	@Column(name = "source")
 	String source;
+
 	@Column(name = "amount")
 	BigDecimal amount;
+
 	@Column(name = "created_at")
 	OffsetDateTime createdAt;
 
@@ -46,7 +49,7 @@ public class ExternalTransfer {
 	}
 
 	public static org.jooq.Table<org.jooq.Record> table() {
-		return DSL.table("accounts");
+		return DSL.table("external_transfers");
 	}
 
 	public String getSource() {

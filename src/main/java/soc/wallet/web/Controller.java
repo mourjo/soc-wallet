@@ -1,6 +1,7 @@
 package soc.wallet.web;
 
 import static org.jooq.impl.DSL.asterisk;
+import static org.jooq.impl.DSL.row;
 import static soc.wallet.common.Constants.AUTH_HEADER_NAME;
 
 import io.javalin.http.Context;
@@ -22,6 +23,7 @@ import org.jooq.exception.IntegrityConstraintViolationException;
 import org.jooq.impl.DSL;
 import soc.wallet.common.Environment;
 import soc.wallet.entities.AccountEntity;
+import soc.wallet.entities.ExternalTransfer;
 import soc.wallet.entities.UserEntity;
 import soc.wallet.exceptions.AccountCreationFailedException;
 import soc.wallet.exceptions.UnauthenticatedRequest;
@@ -30,9 +32,12 @@ import soc.wallet.exceptions.UserNotFoundException;
 import soc.wallet.web.dto.AccountCreationRequest;
 import soc.wallet.web.dto.AccountCreationResponse;
 import soc.wallet.web.dto.ErrorResponse;
+import soc.wallet.web.dto.ExternalTransferCreationRequest;
+import soc.wallet.web.dto.ExternalTransferCreationResponse;
 import soc.wallet.web.dto.UserCreationRequest;
 import soc.wallet.web.dto.UserCreationResponse;
 import soc.wallet.web.dto.UserFetchResponse;
+import soc.wallet.web.soc.wallet.exceptions.InvalidTransferException;
 
 @Slf4j
 public class Controller {
@@ -72,31 +77,28 @@ public class Controller {
 		}
 		var request = ctx.bodyAsClass(UserCreationRequest.class);
 		try (Connection conn = getConnection()) {
-			DSL.using(conn, SQLDialect.POSTGRES)
-					.transaction(trx -> {
-						UserEntity user = trx.dsl()
-								.insertInto(UserEntity.table())
-								.columns(
-										UserEntity.nameField(),
-										UserEntity.emailField()
-								).values(request.name(), request.email())
-								.onConflictDoNothing()
-								.returningResult(
-										UserEntity.idField(),
-										UserEntity.emailField(),
-										UserEntity.nameField(),
-										UserEntity.createdAtField()
-								)
-								.fetchAnyInto(UserEntity.class);
+			UserEntity user = DSL.using(conn, SQLDialect.POSTGRES)
+					.insertInto(UserEntity.table())
+					.columns(
+							UserEntity.nameField(),
+							UserEntity.emailField()
+					).values(request.name(), request.email())
+					.onConflictDoNothing()
+					.returningResult(
+							UserEntity.idField(),
+							UserEntity.emailField(),
+							UserEntity.nameField(),
+							UserEntity.createdAtField()
+					)
+					.fetchAnyInto(UserEntity.class);
 
-						if (user == null) {
-							throw new UserAlreadyExistsException();
-						}
+			if (user == null) {
+				throw new UserAlreadyExistsException();
+			}
 
-						ctx.json(new UserCreationResponse(user.getId(),
-								DateTimeFormatter.ISO_DATE_TIME.format(user.getCreatedAt())));
-						ctx.status(HttpStatus.CREATED);
-					});
+			ctx.json(new UserCreationResponse(user.getId(),
+					DateTimeFormatter.ISO_DATE_TIME.format(user.getCreatedAt())));
+			ctx.status(HttpStatus.CREATED);
 		}
 	}
 
@@ -167,42 +169,123 @@ public class Controller {
 		}
 		var request = ctx.bodyAsClass(AccountCreationRequest.class);
 		try (Connection conn = getConnection()) {
+			try {
+				var account = DSL.using(conn, SQLDialect.POSTGRES)
+						.insertInto(AccountEntity.table())
+						.columns(
+								AccountEntity.userIdField(),
+								AccountEntity.currencyField(),
+								AccountEntity.balanceField()
+						).values(
+								request.userId(),
+								request.currency().toString(),
+								new BigDecimal(0)
+						).returningResult(
+								AccountEntity.userIdField(),
+								AccountEntity.balanceField(),
+								AccountEntity.currencyField(),
+								AccountEntity.createdAtField(),
+								AccountEntity.idField()
+						)
+						.fetchAnyInto(AccountEntity.class);
+
+				var user = DSL.using(conn, SQLDialect.POSTGRES)
+						.select(
+								UserEntity.createdAtField(),
+								UserEntity.idField(),
+								UserEntity.emailField(),
+								UserEntity.nameField()
+						).from(UserEntity.table())
+						.where(
+								UserEntity.idField().eq(account.getUserId())
+						).fetchOneInto(UserEntity.class);
+				ctx.json(AccountCreationResponse.build(account, user));
+
+				ctx.status(HttpStatus.CREATED);
+			} catch (IntegrityConstraintViolationException ex) {
+				throw new AccountCreationFailedException();
+			}
+
+		}
+	}
+
+
+
+	@SneakyThrows
+	@OpenApi(
+			summary = "External Transfer",
+			operationId = "externalTrasnfer",
+			path = "/transfer/external",
+			requestBody = @OpenApiRequestBody(required = true, content = {
+					@OpenApiContent(from = ExternalTransferCreationRequest.class)}),
+			methods = HttpMethod.POST,
+			headers = {
+					@OpenApiParam(name = AUTH_HEADER_NAME, required = true, description = "Authentication Token")},
+			responses = {
+					@OpenApiResponse(status = "201", content = {
+							@OpenApiContent(from = ExternalTransferCreationResponse.class)}),
+					@OpenApiResponse(status = "400", content = {
+							@OpenApiContent(from = ErrorResponse.class)}),
+					@OpenApiResponse(status = "401", content = {
+							@OpenApiContent(from = ErrorResponse.class)})
+			}
+	)
+	public void createExternalTransfer(Context ctx) {
+		var request = ctx.bodyAsClass(ExternalTransferCreationRequest.class);
+		BigDecimal amount = new BigDecimal(request.amount());
+
+		if (!Environment.getApiSecret().equals(ctx.header(AUTH_HEADER_NAME))) {
+			throw new UnauthenticatedRequest();
+		}
+
+		try (Connection conn = getConnection()) {
 
 			DSL.using(conn, SQLDialect.POSTGRES)
 					.transaction(trx -> {
 						try {
-							var account = trx.dsl()
-									.insertInto(AccountEntity.table())
+
+							AccountEntity account = trx.dsl()
+									.select(asterisk())
+									.from(AccountEntity.table())
+									.where(AccountEntity.idField().eq(request.accountId()))
+									.fetchOneInto(AccountEntity.class);
+
+							if (account == null) {
+								throw new InvalidTransferException("Account does not exist");
+							}
+
+							BigDecimal resultingBalance = account.getBalance().add(amount);
+							if(resultingBalance.compareTo(BigDecimal.ZERO) < 0) {
+								throw new InvalidTransferException("There is not enough balance to execute this transfer");
+							}
+
+							ExternalTransfer transfer = trx.dsl().insertInto(ExternalTransfer.table())
 									.columns(
-											AccountEntity.userIdField(),
-											AccountEntity.currencyField(),
-											AccountEntity.balanceField()
+											ExternalTransfer.amountField(),
+											ExternalTransfer.sourceField(),
+											ExternalTransfer.accountIdField()
 									).values(
-											request.userId(),
-											request.currency().toString(),
-											new BigDecimal(0)
+											amount,
+											request.source(),
+											request.accountId()
 									).returningResult(
-											AccountEntity.userIdField(),
-											AccountEntity.balanceField(),
-											AccountEntity.currencyField(),
-											AccountEntity.createdAtField(),
-											AccountEntity.idField()
-									)
-									.fetchAnyInto(AccountEntity.class);
+											ExternalTransfer.idField(),
+											ExternalTransfer.createdAtField())
+									.fetchOneInto(ExternalTransfer.class);
 
-							var user = trx.dsl()
-									.select(
-											UserEntity.createdAtField(),
-											UserEntity.idField(),
-											UserEntity.emailField(),
-											UserEntity.nameField()
-									).from(UserEntity.table())
-									.where(
-											UserEntity.idField().eq(account.getUserId())
-									).fetchOneInto(UserEntity.class);
 
-							ctx.json(AccountCreationResponse.build(account, user));
 
+							int rowsUpdated = trx.dsl().update(AccountEntity.table())
+									.set(row(AccountEntity.balanceField()), row(resultingBalance))
+									.where(AccountEntity.idField().eq(account.getId()))
+									.execute();
+
+							if (transfer == null || rowsUpdated != 1) {
+								throw new InvalidTransferException("Failed to create transfer");
+							}
+
+
+							ctx.json(ExternalTransferCreationResponse.build(transfer, resultingBalance));
 							ctx.status(HttpStatus.CREATED);
 						} catch (IntegrityConstraintViolationException ex) {
 							throw new AccountCreationFailedException();
