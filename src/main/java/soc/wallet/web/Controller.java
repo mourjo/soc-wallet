@@ -205,10 +205,8 @@ public class Controller {
 			} catch (IntegrityConstraintViolationException ex) {
 				throw new AccountCreationFailedException();
 			}
-
 		}
 	}
-
 
 
 	@SneakyThrows
@@ -239,7 +237,6 @@ public class Controller {
 		}
 
 		try (Connection conn = getConnection()) {
-
 			DSL.using(conn, SQLDialect.POSTGRES)
 					.transaction(trx -> {
 						try {
@@ -255,11 +252,14 @@ public class Controller {
 							}
 
 							BigDecimal resultingBalance = account.getBalance().add(amount);
-							if(resultingBalance.compareTo(BigDecimal.ZERO) < 0) {
-								throw new InvalidTransferException("There is not enough balance to execute this transfer");
+							if (resultingBalance.compareTo(BigDecimal.ZERO) < 0) {
+								throw new InvalidTransferException(
+										"There is not enough balance to execute this transfer"
+								);
 							}
 
-							ExternalTransfer transfer = trx.dsl().insertInto(ExternalTransfer.table())
+							ExternalTransfer transfer = trx.dsl()
+									.insertInto(ExternalTransfer.table())
 									.columns(
 											ExternalTransfer.amountField(),
 											ExternalTransfer.sourceField(),
@@ -273,8 +273,6 @@ public class Controller {
 											ExternalTransfer.createdAtField())
 									.fetchOneInto(ExternalTransfer.class);
 
-
-
 							int rowsUpdated = trx.dsl().update(AccountEntity.table())
 									.set(row(AccountEntity.balanceField()), row(resultingBalance))
 									.where(AccountEntity.idField().eq(account.getId()))
@@ -284,8 +282,8 @@ public class Controller {
 								throw new InvalidTransferException("Failed to create transfer");
 							}
 
-
-							ctx.json(ExternalTransferCreationResponse.build(transfer, resultingBalance));
+							ctx.json(ExternalTransferCreationResponse.build(transfer,
+									resultingBalance));
 							ctx.status(HttpStatus.CREATED);
 						} catch (IntegrityConstraintViolationException ex) {
 							throw new AccountCreationFailedException();

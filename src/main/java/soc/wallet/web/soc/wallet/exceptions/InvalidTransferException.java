@@ -5,7 +5,9 @@ import soc.wallet.exceptions.WalletException;
 import soc.wallet.web.dto.ErrorResponse;
 
 public class InvalidTransferException extends WalletException {
+
 	String message;
+
 	private InvalidTransferException() {
 		super();
 	}
