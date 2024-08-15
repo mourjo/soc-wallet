@@ -2,6 +2,11 @@
 
 [![Maven Build with Docker](https://github.com/mourjo/soc-wallet/actions/workflows/maven.yml/badge.svg)](https://github.com/mourjo/soc-wallet/actions/workflows/maven.yml)
 
+## Start dependent services
+```bash
+docker compose up
+```
+
 ## Environment variables
 
 - `PG_HOST` defaults to `localhost`
