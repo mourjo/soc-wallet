@@ -25,7 +25,7 @@ public class AccountIntegratonTest {
 		var userJill = DbHelpers.insertUser("Jill");
 
 		JavalinTest.test(app, (server, client) -> {
-			var response = client.put("/account",
+			var response = client.post("/account",
 					new AccountCreationRequest(userJill.getId(), currency),
 					HttpHelpers.headers()
 			);
@@ -43,7 +43,7 @@ public class AccountIntegratonTest {
 		var userHellen = DbHelpers.insertUser("Hellen");
 
 		JavalinTest.test(app, (server, client) -> {
-			var response = client.put(
+			var response = client.post(
 					"/account",
 					Map.of(
 							"currency", "NOT A VALID CURRENCY",
@@ -58,7 +58,7 @@ public class AccountIntegratonTest {
 	@Test
 	void createAccountForNonExistentUser() {
 		JavalinTest.test(app, (server, client) -> {
-			var response = client.put("/account",
+			var response = client.post("/account",
 					new AccountCreationRequest(99999, SupportedCurrency.EUR),
 					HttpHelpers.headers());
 			Assertions.assertEquals(400, response.code());
@@ -72,7 +72,7 @@ public class AccountIntegratonTest {
 		var userMary = DbHelpers.insertUser("Mary");
 
 		JavalinTest.test(app, (server, client) -> {
-			var response = client.put("/account",
+			var response = client.post("/account",
 					new AccountCreationRequest(userMary.getId(), SupportedCurrency.EUR));
 			Assertions.assertEquals(401, response.code());
 		});
@@ -83,7 +83,7 @@ public class AccountIntegratonTest {
 		var userMary = DbHelpers.insertUser("Nelly");
 
 		JavalinTest.test(app, (server, client) -> {
-			var response = client.put("/account",
+			var response = client.post("/account",
 					new AccountCreationRequest(userMary.getId(), SupportedCurrency.EUR),
 					req -> req.header(AUTH_HEADER_NAME, "BAD_VALUE"));
 			Assertions.assertEquals(401, response.code());

@@ -59,7 +59,7 @@ public class Controller {
 			path = "/user",
 			requestBody = @OpenApiRequestBody(required = true, content = {
 					@OpenApiContent(from = UserCreationRequest.class)}),
-			methods = HttpMethod.PUT,
+			methods = HttpMethod.POST,
 			headers = {
 					@OpenApiParam(name = AUTH_HEADER_NAME, required = true, description = "Authentication Token")},
 			responses = {
@@ -151,7 +151,7 @@ public class Controller {
 			path = "/account",
 			requestBody = @OpenApiRequestBody(required = true, content = {
 					@OpenApiContent(from = AccountCreationRequest.class)}),
-			methods = HttpMethod.PUT,
+			methods = HttpMethod.POST,
 			headers = {
 					@OpenApiParam(name = AUTH_HEADER_NAME, required = true, description = "Authentication Token")},
 			responses = {
@@ -289,7 +289,7 @@ public class Controller {
 								throw new InvalidTransferException("Failed to create transfer");
 							}
 
-							var response = 	ExternalTransferCreationResponse.build(
+							var response = ExternalTransferCreationResponse.build(
 									transfer,
 									resultingBalance,
 									account.getCurrency()

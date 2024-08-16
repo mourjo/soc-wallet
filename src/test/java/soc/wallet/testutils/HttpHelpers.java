@@ -14,6 +14,7 @@ import soc.wallet.web.dto.SupportedCurrency;
 
 
 public class HttpHelpers {
+
 	final static Random r = new Random();
 
 	@NotNull
@@ -21,18 +22,42 @@ public class HttpHelpers {
 		return req -> req.header(AUTH_HEADER_NAME, Environment.getApiSecret());
 	}
 
-	public static ExternalTransferCreationRequest externalTransferRequest(AccountEntity account, SupportedCurrency currency, String amount, String source) {
-		return new ExternalTransferCreationRequest(account.getId(), currency, amount, source);
+	public static ExternalTransferCreationRequest externalTransferRequest(AccountEntity account,
+			SupportedCurrency currency, String amount) {
+		return new ExternalTransferCreationRequest(
+				account.getId(),
+				currency,
+				amount,
+				UUID.randomUUID().toString()
+		);
 	}
 
-	public static ExternalTransferCreationRequest externalTransferRequest(AccountEntity account, SupportedCurrency currency, String amount) {
-		return new ExternalTransferCreationRequest(account.getId(), currency, amount,
-				UUID.randomUUID().toString());
+	public static ExternalTransferCreationRequest externalTransferRequest(AccountEntity account,
+			String amount) {
+		return new ExternalTransferCreationRequest(
+				account.getId(),
+				SupportedCurrency.valueOf(account.getCurrency()),
+				amount,
+				UUID.randomUUID().toString()
+		);
 	}
 
-	public static ExternalTransferCreationRequest externalTransferRequest(AccountEntity account, SupportedCurrency currency) {
-		return new ExternalTransferCreationRequest(account.getId(), currency, Integer.toString(r.nextInt(1000)),
-				UUID.randomUUID().toString());
+	public static ExternalTransferCreationRequest externalTransferRequest(long accountId,
+			String currency, String amount) {
+		return new ExternalTransferCreationRequest(
+				accountId,
+				SupportedCurrency.valueOf(currency),
+				amount,
+				UUID.randomUUID().toString()
+		);
 	}
 
+	public static ExternalTransferCreationRequest externalTransferRequest(AccountEntity account) {
+		return new ExternalTransferCreationRequest(
+				account.getId(),
+				SupportedCurrency.valueOf(account.getCurrency()),
+				Integer.toString(r.nextInt(1000)),
+				UUID.randomUUID().toString()
+		);
+	}
 }

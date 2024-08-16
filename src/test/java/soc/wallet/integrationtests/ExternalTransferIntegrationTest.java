@@ -9,8 +9,6 @@ import org.junit.jupiter.api.Test;
 import soc.wallet.testutils.DbHelpers;
 import soc.wallet.testutils.HttpHelpers;
 import soc.wallet.web.Launcher;
-import soc.wallet.web.dto.ExternalTransferCreationRequest;
-import soc.wallet.web.dto.SupportedCurrency;
 
 public class ExternalTransferIntegrationTest {
 
@@ -23,10 +21,9 @@ public class ExternalTransferIntegrationTest {
 		Assertions.assertEquals(0, BigDecimal.ZERO.compareTo(account.getBalance()));
 
 		JavalinTest.test(app, (server, client) -> {
-			var req = new ExternalTransferCreationRequest(account.getId(), SupportedCurrency.INR, "100", "SBI");
 			var response = client.post(
 					"/transfer/external",
-					req,
+					HttpHelpers.externalTransferRequest(account, "100"),
 					HttpHelpers.headers()
 			);
 			Assertions.assertEquals(201, response.code());
@@ -46,9 +43,9 @@ public class ExternalTransferIntegrationTest {
 		Assertions.assertEquals(0, BigDecimal.ZERO.compareTo(account.getBalance()));
 
 		var transfers = List.of(
-				HttpHelpers.externalTransferRequest(account, SupportedCurrency.INR, "50"),
-				HttpHelpers.externalTransferRequest(account, SupportedCurrency.INR, "499.50"),
-				HttpHelpers.externalTransferRequest(account, SupportedCurrency.INR, "-99")
+				HttpHelpers.externalTransferRequest(account, "50"),
+				HttpHelpers.externalTransferRequest(account, "499.50"),
+				HttpHelpers.externalTransferRequest(account, "-99")
 		);
 
 		JavalinTest.test(app, (server, client) -> {
@@ -72,10 +69,9 @@ public class ExternalTransferIntegrationTest {
 		Assertions.assertEquals(0, BigDecimal.ZERO.compareTo(account.getBalance()));
 
 		JavalinTest.test(app, (server, client) -> {
-			var req = new ExternalTransferCreationRequest(account.getId(), SupportedCurrency.INR, "100", "SBI");
 			var response = client.post(
 					"/transfer/external",
-					req,
+					HttpHelpers.externalTransferRequest(account.getId(), "INR", "100"),
 					HttpHelpers.headers()
 			);
 			Assertions.assertEquals(400, response.code());
@@ -92,10 +88,9 @@ public class ExternalTransferIntegrationTest {
 		Assertions.assertEquals(0, BigDecimal.ZERO.compareTo(account.getBalance()));
 
 		JavalinTest.test(app, (server, client) -> {
-			var req = new ExternalTransferCreationRequest(account.getId(), SupportedCurrency.EUR, "-100", "SBI");
 			var response = client.post(
 					"/transfer/external",
-					req,
+					HttpHelpers.externalTransferRequest(account, "-50"),
 					HttpHelpers.headers()
 			);
 			Assertions.assertEquals(400, response.code());
@@ -112,10 +107,9 @@ public class ExternalTransferIntegrationTest {
 		Assertions.assertEquals(0, BigDecimal.ZERO.compareTo(account.getBalance()));
 
 		JavalinTest.test(app, (server, client) -> {
-			var req = new ExternalTransferCreationRequest(999888777, SupportedCurrency.EUR,  "-100", "SBI");
 			var response = client.post(
 					"/transfer/external",
-					req,
+					HttpHelpers.externalTransferRequest(999888777, "EUR", "50"),
 					HttpHelpers.headers()
 			);
 			Assertions.assertEquals(400, response.code());

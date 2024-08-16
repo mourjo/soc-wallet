@@ -17,9 +17,9 @@ public class Launcher {
 		final Controller controller = new Controller();
 
 		return Javalin.create(OpenAPISetup::registerPlugins)
-				.put("/user", controller::createUser)
+				.post("/user", controller::createUser)
 				.get("/user/{userId}", controller::retrieveUser)
-				.put("/account", controller::createAccount)
+				.post("/account", controller::createAccount)
 				.post("/transfer/external", controller::createExternalTransfer)
 				.exception(Exception.class, ExceptionHandler::handleException);
 	}

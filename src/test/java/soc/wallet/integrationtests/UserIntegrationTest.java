@@ -21,7 +21,7 @@ public class UserIntegrationTest {
 		String name = "Joe";
 
 		JavalinTest.test(app, (server, client) -> {
-			var response = client.put(
+			var response = client.post(
 					"/user",
 					new UserCreationRequest(email, name),
 					HttpHelpers.headers()
@@ -39,13 +39,13 @@ public class UserIntegrationTest {
 
 		JavalinTest.test(app, (server, client) -> {
 			Assertions.assertEquals(201,
-					client.put(
+					client.post(
 							"/user",
 							new UserCreationRequest(email, name),
 							HttpHelpers.headers()
 					).code());
 
-			var response = client.put(
+			var response = client.post(
 					"/user",
 					new UserCreationRequest(email, name),
 					HttpHelpers.headers()
@@ -63,7 +63,7 @@ public class UserIntegrationTest {
 
 		JavalinTest.test(app, (server, client) -> {
 			var id = TypeConversion.toUserCreationResponse(
-					client.put(
+					client.post(
 							"/user",
 							new UserCreationRequest(email, name),
 							HttpHelpers.headers()
@@ -104,7 +104,7 @@ public class UserIntegrationTest {
 		String name = "Jon";
 
 		JavalinTest.test(app, (server, client) -> {
-			var response = client.put("/user", new UserCreationRequest(email, name));
+			var response = client.post("/user", new UserCreationRequest(email, name));
 			Assertions.assertEquals(401, response.code());
 			var body = TypeConversion.toErrorResponse(response);
 			Assertions.assertEquals("Invalid Authentication", body.message());
@@ -117,7 +117,7 @@ public class UserIntegrationTest {
 		String name = "Jon";
 
 		JavalinTest.test(app, (server, client) -> {
-			var response = client.put("/user", new UserCreationRequest(email, name),
+			var response = client.post("/user", new UserCreationRequest(email, name),
 					req -> req.header(AUTH_HEADER_NAME, "BAD_VALUE"));
 			Assertions.assertEquals(401, response.code());
 			var body = TypeConversion.toErrorResponse(response);
