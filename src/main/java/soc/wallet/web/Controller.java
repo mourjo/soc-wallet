@@ -258,6 +258,12 @@ public class Controller {
 								);
 							}
 
+							if (!account.getCurrency().equals(request.currency().name())) {
+								throw new InvalidTransferException(
+										"Transfer currency and account currency cannot be different"
+								);
+							}
+
 							ExternalTransfer transfer = trx.dsl()
 									.insertInto(ExternalTransfer.table())
 									.columns(
@@ -283,8 +289,13 @@ public class Controller {
 								throw new InvalidTransferException("Failed to create transfer");
 							}
 
-							ctx.json(ExternalTransferCreationResponse.build(transfer,
-									resultingBalance));
+							var response = 	ExternalTransferCreationResponse.build(
+									transfer,
+									resultingBalance,
+									account.getCurrency()
+							);
+
+							ctx.json(response);
 							ctx.status(HttpStatus.CREATED);
 						} catch (IntegrityConstraintViolationException ex) {
 							throw new AccountCreationFailedException();
