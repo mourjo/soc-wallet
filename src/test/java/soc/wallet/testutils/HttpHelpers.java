@@ -81,7 +81,8 @@ public class HttpHelpers {
 		);
 	}
 
-	public static void internalTransfer(HttpClient client, AccountEntity source, AccountEntity destination, String amount) {
+	public static void internalTransfer(HttpClient client, AccountEntity source,
+			AccountEntity destination, String amount) {
 		client.post(
 				"/transfer/internal",
 				internalTransferRequest(source, destination, amount),

@@ -16,7 +16,7 @@ public class InternalTransferIntegrationTest {
 	@Test
 	void validExternalTransfer() {
 		var sourceAccount = DbHelpers.insertAccount(1000, "EUR");
-		var destinationAccount = DbHelpers.insertAccount(0,"EUR");
+		var destinationAccount = DbHelpers.insertAccount(0, "EUR");
 
 		JavalinTest.test(app, (server, client) -> {
 			var response = client.post(
@@ -40,9 +40,10 @@ public class InternalTransferIntegrationTest {
 	@Test
 	void multipleValidExternalTransfers() {
 		var a1 = DbHelpers.insertAccount(700, "EUR");
-		var a2 = DbHelpers.insertAccount(0,"EUR");
-		var a3 = DbHelpers.insertAccount(50,"EUR");
-		var totalMoneyBefore = DbHelpers.getBalance(a1) + DbHelpers.getBalance(a2) + DbHelpers.getBalance(a3);
+		var a2 = DbHelpers.insertAccount(0, "EUR");
+		var a3 = DbHelpers.insertAccount(50, "EUR");
+		var totalMoneyBefore =
+				DbHelpers.getBalance(a1) + DbHelpers.getBalance(a2) + DbHelpers.getBalance(a3);
 
 		JavalinTest.test(app, (server, client) -> {
 			client.post(
@@ -71,11 +72,12 @@ public class InternalTransferIntegrationTest {
 
 		});
 
-		Assertions.assertEquals(700-50-200+10, DbHelpers.getBalance(a1));
-		Assertions.assertEquals(50+100-10, DbHelpers.getBalance(a2));
-		Assertions.assertEquals(50+200-100, DbHelpers.getBalance(a3));
+		Assertions.assertEquals(700 - 50 - 200 + 10, DbHelpers.getBalance(a1));
+		Assertions.assertEquals(50 + 100 - 10, DbHelpers.getBalance(a2));
+		Assertions.assertEquals(50 + 200 - 100, DbHelpers.getBalance(a3));
 
-		var totalMoneyAfter = DbHelpers.getBalance(a1) + DbHelpers.getBalance(a2) + DbHelpers.getBalance(a3);
+		var totalMoneyAfter =
+				DbHelpers.getBalance(a1) + DbHelpers.getBalance(a2) + DbHelpers.getBalance(a3);
 
 		Assertions.assertEquals(totalMoneyBefore, totalMoneyAfter);
 	}
@@ -103,7 +105,7 @@ public class InternalTransferIntegrationTest {
 		JavalinTest.test(app, (server, client) -> {
 			var response = client.post(
 					"/transfer/internal",
-					HttpHelpers.internalTransferRequest( account.getId(),111111111, "EUR", "50"),
+					HttpHelpers.internalTransferRequest(account.getId(), 111111111, "EUR", "50"),
 					HttpHelpers.headers()
 			);
 
@@ -128,14 +130,15 @@ public class InternalTransferIntegrationTest {
 
 			Assertions.assertEquals(400, response.code());
 			var body = TypeConversion.toErrorResponse(response);
-			Assertions.assertEquals("There is not enough balance to execute this transfer", body.message());
+			Assertions.assertEquals("There is not enough balance to execute this transfer",
+					body.message());
 
 		});
 	}
 
 	@Test
 	void selfExternalTransfer() {
-		var source = DbHelpers.insertAccount(1000,"EUR");
+		var source = DbHelpers.insertAccount(1000, "EUR");
 
 		JavalinTest.test(app, (server, client) -> {
 			var response = client.post(
@@ -153,7 +156,7 @@ public class InternalTransferIntegrationTest {
 
 	@Test
 	void negativeExternalTransfer() {
-		var source = DbHelpers.insertAccount(1000,"EUR");
+		var source = DbHelpers.insertAccount(1000, "EUR");
 
 		JavalinTest.test(app, (server, client) -> {
 			var response = client.post(
