@@ -333,11 +333,11 @@ public class Controller {
 		BigDecimal amount = new BigDecimal(request.amount());
 
 		if (amount.compareTo(BigDecimal.ZERO) < 0) {
-			throw new InvalidTransferException("Negative transfers not allowed");
+			throw new InvalidTransferException("Negative transfers are not allowed");
 		}
 
 		if (request.sourceAccount() == request.destinationAccount()) {
-			throw new InvalidTransferException("Self transfers not allowed");
+			throw new InvalidTransferException("Self transfers are not allowed");
 		}
 
 		try (Connection conn = getConnection()) {

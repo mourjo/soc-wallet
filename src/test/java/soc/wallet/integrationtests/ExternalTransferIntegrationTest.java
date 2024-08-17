@@ -16,9 +16,8 @@ public class ExternalTransferIntegrationTest {
 
 	@Test
 	void validExternalTransfer() {
-		var user = DbHelpers.insertUser("Monty");
-		var account = DbHelpers.insertAccount("INR", user.getId());
-		Assertions.assertEquals(0, BigDecimal.ZERO.compareTo(account.getBalance()));
+		var account = DbHelpers.insertAccount("INR");
+		Assertions.assertEquals(0, DbHelpers.getBalance(account));
 
 		JavalinTest.test(app, (server, client) -> {
 			var response = client.post(
@@ -33,14 +32,13 @@ public class ExternalTransferIntegrationTest {
 			Assertions.assertEquals(account.getId(), body.accountId());
 		});
 		var updatedAccount = DbHelpers.getAccount(account.getId());
-		Assertions.assertEquals(0, new BigDecimal(100).compareTo(updatedAccount.getBalance()));
+		Assertions.assertEquals(100, DbHelpers.getBalance(updatedAccount));
 	}
 
 	@Test
 	void multipleExternalTransfers() {
-		var user = DbHelpers.insertUser("Monty");
-		var account = DbHelpers.insertAccount("INR", user.getId());
-		Assertions.assertEquals(0, BigDecimal.ZERO.compareTo(account.getBalance()));
+		var account = DbHelpers.insertAccount("INR");
+		Assertions.assertEquals(0, DbHelpers.getBalance(account));
 
 		var transfers = List.of(
 				HttpHelpers.externalTransferRequest(account, "50"),
@@ -59,14 +57,13 @@ public class ExternalTransferIntegrationTest {
 		});
 
 		var updatedAccount = DbHelpers.getAccount(account.getId());
-		Assertions.assertEquals(0, new BigDecimal("450.5").compareTo(updatedAccount.getBalance()));
+		Assertions.assertEquals(450.5, DbHelpers.getBalance(updatedAccount));
 	}
 
 	@Test
 	void incompatibleCurrencyExternalTransfer() {
-		var user = DbHelpers.insertUser("Monty");
-		var account = DbHelpers.insertAccount("EUR", user.getId());
-		Assertions.assertEquals(0, BigDecimal.ZERO.compareTo(account.getBalance()));
+		var account = DbHelpers.insertAccount("EUR");
+		Assertions.assertEquals(0, DbHelpers.getBalance(account));
 
 		JavalinTest.test(app, (server, client) -> {
 			var response = client.post(
@@ -83,9 +80,8 @@ public class ExternalTransferIntegrationTest {
 
 	@Test
 	void negativeBalanceExternalTransfer() {
-		var user = DbHelpers.insertUser("Monty");
-		var account = DbHelpers.insertAccount("EUR", user.getId());
-		Assertions.assertEquals(0, BigDecimal.ZERO.compareTo(account.getBalance()));
+		var account = DbHelpers.insertAccount("EUR");
+		Assertions.assertEquals(0, DbHelpers.getBalance(account));
 
 		JavalinTest.test(app, (server, client) -> {
 			var response = client.post(
@@ -102,9 +98,8 @@ public class ExternalTransferIntegrationTest {
 
 	@Test
 	void invalidAccountExternalTransfer() {
-		var user = DbHelpers.insertUser("Monty");
-		var account = DbHelpers.insertAccount("EUR", user.getId());
-		Assertions.assertEquals(0, BigDecimal.ZERO.compareTo(account.getBalance()));
+		var account = DbHelpers.insertAccount("EUR");
+		Assertions.assertEquals(0, DbHelpers.getBalance(account));
 
 		JavalinTest.test(app, (server, client) -> {
 			var response = client.post(

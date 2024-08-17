@@ -12,6 +12,7 @@ import org.jooq.impl.DSL;
 import soc.wallet.common.Environment;
 import soc.wallet.entities.AccountEntity;
 import soc.wallet.entities.UserEntity;
+import soc.wallet.web.dto.SupportedCurrency;
 
 public class DbHelpers {
 
@@ -45,13 +46,29 @@ public class DbHelpers {
 	}
 
 	@SneakyThrows
-	public static AccountEntity insertAccount(String currency, long userId) {
+	public static AccountEntity insertAccount() {
+		return insertAccount(0, SupportedCurrency.INR.toString());
+	}
+
+	@SneakyThrows
+	public static AccountEntity insertAccount(String currency) {
+		return insertAccount(0, currency);
+	}
+
+	@SneakyThrows
+	public static AccountEntity insertAccount(double amount, String currency) {
+		var user = insertUser("random-");
+		return insertAccount(amount, currency, user.getId());
+	}
+
+	@SneakyThrows
+	public static AccountEntity insertAccount(double amount, String currency, long userId) {
 		try (Connection conn = getConnection()) {
 			return DSL.using(conn, SQLDialect.POSTGRES)
 					.insertInto(AccountEntity.table())
 					.columns(AccountEntity.currencyField(), AccountEntity.userIdField(),
 							AccountEntity.balanceField())
-					.values(currency, userId, BigDecimal.ZERO)
+					.values(currency, userId, new BigDecimal(amount))
 					.returningResult(AccountEntity.balanceField(), AccountEntity.idField(),
 							AccountEntity.createdAtField(), AccountEntity.userIdField(),
 							AccountEntity.currencyField())
@@ -70,6 +87,16 @@ public class DbHelpers {
 					.where(AccountEntity.idField().eq(accountId))
 					.fetchAnyInto(AccountEntity.class);
 		}
+	}
+
+	@SneakyThrows
+	public static double getBalance(long accountId) {
+		return getAccount(accountId).getBalance().doubleValue();
+	}
+
+	@SneakyThrows
+	public static double getBalance(AccountEntity account) {
+		return getAccount(account.getId()).getBalance().doubleValue();
 	}
 
 }
