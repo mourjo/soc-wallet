@@ -80,7 +80,8 @@ public class HttpHelpers {
 		);
 	}
 
-	public static void externalTransfer(HttpClient client, AccountEntity account, String amount, String source) {
+	public static void externalTransfer(HttpClient client, AccountEntity account, String amount,
+			String source) {
 		client.post(
 				"/transfer/external",
 				externalTransferRequest(account, amount, source),

@@ -18,7 +18,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.jooq.SQLDialect;
 import org.jooq.exception.IntegrityConstraintViolationException;
 import org.jooq.impl.DSL;
@@ -214,7 +213,8 @@ public class Controller {
 					.where(InternalTransfer.sourceAccountIdField().eq(accountId))
 					.fetchInto(InternalTransfer.class);
 
-			ctx.json(AccountFetchResponse.build(account, user, externalTransfers, internalCreditTransfers, internalDebitTransfers));
+			ctx.json(AccountFetchResponse.build(account, user, externalTransfers,
+					internalCreditTransfers, internalDebitTransfers));
 			ctx.status(HttpStatus.OK);
 		}
 	}

@@ -6,7 +6,6 @@ import io.javalin.Javalin;
 import io.javalin.testtools.JavalinTest;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -18,7 +17,6 @@ import soc.wallet.web.dto.AccountCreationRequest;
 import soc.wallet.web.dto.SupportedCurrency;
 import soc.wallet.web.dto.TransferInfo;
 import soc.wallet.web.dto.TransferInfo.TransferType;
-import soc.wallet.web.dto.UserCreationRequest;
 
 public class AccountIntegratonTest {
 
@@ -61,7 +59,8 @@ public class AccountIntegratonTest {
 			HttpHelpers.externalTransfer(client, aliceAccount, "-10", "SBI");
 			HttpHelpers.internalTransfer(client, aliceAccount, johnAccount, "20");
 
-			var aliceAccountInfo =  TypeConversion.toAccountFetchResponse( client.get("/account/" + aliceAccount.getId(), HttpHelpers.headers()));
+			var aliceAccountInfo = TypeConversion.toAccountFetchResponse(
+					client.get("/account/" + aliceAccount.getId(), HttpHelpers.headers()));
 			Assertions.assertEquals("150.00", aliceAccountInfo.balance());
 			Assertions.assertEquals("EUR", aliceAccountInfo.currency());
 			Assertions.assertEquals(alice.getEmail(), aliceAccountInfo.userEmail());
@@ -81,7 +80,8 @@ public class AccountIntegratonTest {
 					aliceTransfers
 			);
 
-			var bobAccountInfo = TypeConversion.toAccountFetchResponse( client.get("/account/" + bobAccount.getId(), HttpHelpers.headers()));
+			var bobAccountInfo = TypeConversion.toAccountFetchResponse(
+					client.get("/account/" + bobAccount.getId(), HttpHelpers.headers()));
 			Assertions.assertEquals("920.00", bobAccountInfo.balance());
 			Assertions.assertEquals("EUR", bobAccountInfo.currency());
 			Assertions.assertEquals(bob.getEmail(), bobAccountInfo.userEmail());
@@ -99,7 +99,8 @@ public class AccountIntegratonTest {
 					bobTransfers
 			);
 
-			var johnAccountInfo = TypeConversion.toAccountFetchResponse( client.get("/account/" + johnAccount.getId(), HttpHelpers.headers()));
+			var johnAccountInfo = TypeConversion.toAccountFetchResponse(
+					client.get("/account/" + johnAccount.getId(), HttpHelpers.headers()));
 			Assertions.assertEquals("20.00", johnAccountInfo.balance());
 			Assertions.assertEquals("EUR", johnAccountInfo.currency());
 			Assertions.assertEquals(john.getEmail(), johnAccountInfo.userEmail());
@@ -142,8 +143,9 @@ public class AccountIntegratonTest {
 	}
 
 	String formatTransferInfo(TransferInfo t) {
-		String source = (t.transferType() != TransferType.EXTERNAL) ? ("account:"+ t.source()) : t.source();
-		return String.join( "___",  t.transferType().toString(), source, t.amount());
+		String source = (t.transferType() != TransferType.EXTERNAL) ? ("account:" + t.source())
+				: t.source();
+		return String.join("___", t.transferType().toString(), source, t.amount());
 	}
 
 

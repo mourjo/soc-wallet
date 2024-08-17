@@ -1,10 +1,8 @@
 package soc.wallet.web.dto;
 
-import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import soc.wallet.entities.AccountEntity;
 import soc.wallet.entities.ExternalTransfer;
@@ -12,7 +10,8 @@ import soc.wallet.entities.InternalTransfer;
 import soc.wallet.entities.UserEntity;
 import soc.wallet.web.dto.TransferInfo.TransferType;
 
-public record AccountFetchResponse(long id, String balance, String currency, long userId,  String userEmail, String createdAt,
+public record AccountFetchResponse(long id, String balance, String currency, long userId,
+								   String userEmail, String createdAt,
 								   List<TransferInfo> transfers) {
 
 	public static AccountFetchResponse build(
