@@ -12,6 +12,6 @@ public record TransferInfo(long id, String source, String amount, TransferType t
 	}
 
 	public enum TransferType {
-		EXTERNAL, INTERNAL_DEBIT, INTERNAL_CREDIT
+		EXTERNAL_DEBIT, EXTERNAL_CREDIT, INTERNAL_DEBIT, INTERNAL_CREDIT
 	}
 }

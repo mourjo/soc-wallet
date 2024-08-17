@@ -16,7 +16,6 @@ import soc.wallet.web.Launcher;
 import soc.wallet.web.dto.AccountCreationRequest;
 import soc.wallet.web.dto.SupportedCurrency;
 import soc.wallet.web.dto.TransferInfo;
-import soc.wallet.web.dto.TransferInfo.TransferType;
 
 public class AccountIntegratonTest {
 
@@ -74,9 +73,9 @@ public class AccountIntegratonTest {
 			Assertions.assertEquals(
 					List.of(
 							"INTERNAL_DEBIT___account:%d___-20.00".formatted(johnAccount.getId()),
-							"EXTERNAL___SBI___-10.00",
+							"EXTERNAL_DEBIT___SBI___-10.00",
 							"INTERNAL_CREDIT___account:%d___80.00".formatted(bobAccount.getId()),
-							"EXTERNAL___HDFC___100.00"),
+							"EXTERNAL_CREDIT___HDFC___100.00"),
 					aliceTransfers
 			);
 
@@ -143,8 +142,12 @@ public class AccountIntegratonTest {
 	}
 
 	String formatTransferInfo(TransferInfo t) {
-		String source = (t.transferType() != TransferType.EXTERNAL) ? ("account:" + t.source())
-				: t.source();
+		String source =
+				switch (t.transferType()) {
+					case EXTERNAL_DEBIT, EXTERNAL_CREDIT -> t.source();
+					default -> ("account:" + t.source());
+				};
+
 		return String.join("___", t.transferType().toString(), source, t.amount());
 	}
 

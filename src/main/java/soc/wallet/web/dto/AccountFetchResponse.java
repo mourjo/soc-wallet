@@ -1,5 +1,6 @@
 package soc.wallet.web.dto;
 
+import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,7 +29,9 @@ public record AccountFetchResponse(long id, String balance, String currency, lon
 								tr.getId(),
 								tr.getSource(),
 								tr.getAmount().toPlainString(),
-								TransferType.EXTERNAL,
+								tr.getAmount().compareTo(BigDecimal.ZERO) < 0
+										? TransferType.EXTERNAL_DEBIT
+										: TransferType.EXTERNAL_CREDIT,
 								DateTimeFormatter.ISO_DATE_TIME.format(tr.getCreatedAt())
 						)
 				).toList();
