@@ -15,8 +15,10 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.jooq.SQLDialect;
 import org.jooq.exception.IntegrityConstraintViolationException;
 import org.jooq.impl.DSL;
@@ -26,12 +28,14 @@ import soc.wallet.entities.ExternalTransfer;
 import soc.wallet.entities.InternalTransfer;
 import soc.wallet.entities.UserEntity;
 import soc.wallet.exceptions.AccountCreationFailedException;
+import soc.wallet.exceptions.AccountNotFoundException;
 import soc.wallet.exceptions.InvalidTransferException;
 import soc.wallet.exceptions.UnauthenticatedRequest;
 import soc.wallet.exceptions.UserAlreadyExistsException;
 import soc.wallet.exceptions.UserNotFoundException;
 import soc.wallet.web.dto.AccountCreationRequest;
 import soc.wallet.web.dto.AccountCreationResponse;
+import soc.wallet.web.dto.AccountFetchResponse;
 import soc.wallet.web.dto.ErrorResponse;
 import soc.wallet.web.dto.ExternalTransferCreationRequest;
 import soc.wallet.web.dto.ExternalTransferCreationResponse;
@@ -113,6 +117,8 @@ public class Controller {
 			pathParams = {
 					@OpenApiParam(name = "userId", type = String.class, description = "ID of the user")
 			},
+			headers = {
+					@OpenApiParam(name = AUTH_HEADER_NAME, required = true, description = "Authentication Token")},
 			responses = {
 					@OpenApiResponse(status = "200", content = {
 							@OpenApiContent(from = UserFetchResponse.class)}),
@@ -142,6 +148,67 @@ public class Controller {
 			}
 
 			ctx.json(UserFetchResponse.build(user));
+			ctx.status(HttpStatus.OK);
+		}
+	}
+
+	@SneakyThrows
+	@OpenApi(
+			summary = "Fetch account",
+			operationId = "retrieveAccount",
+			path = "/account/{accountId}",
+			methods = HttpMethod.GET,
+			pathParams = {
+					@OpenApiParam(name = "accountId", type = String.class, description = "ID of the account")
+			},
+			headers = {
+					@OpenApiParam(name = AUTH_HEADER_NAME, required = true, description = "Authentication Token")},
+			responses = {
+					@OpenApiResponse(status = "200", content = {
+							@OpenApiContent(from = AccountFetchResponse.class)}),
+					@OpenApiResponse(status = "400", content = {
+							@OpenApiContent(from = ErrorResponse.class)}),
+					@OpenApiResponse(status = "401", content = {
+							@OpenApiContent(from = ErrorResponse.class)})
+			}
+	)
+	public void retrieveAccount(Context ctx) {
+		long accountId = Long.parseLong(ctx.pathParam("accountId"));
+
+		try (Connection conn = getConnection()) {
+			AccountEntity account = DSL.using(conn, SQLDialect.POSTGRES)
+					.select(asterisk())
+					.from(AccountEntity.table())
+					.where(AccountEntity.idField().eq(accountId))
+					.fetchAnyInto(AccountEntity.class);
+
+			if (account == null) {
+				throw new AccountNotFoundException();
+			}
+
+			UserEntity user = DSL.using(conn, SQLDialect.POSTGRES)
+					.select(asterisk())
+					.from(UserEntity.table())
+					.where(UserEntity.idField().eq(account.getUserId()))
+					.fetchAnyInto(UserEntity.class);
+
+			if (!Environment.getApiSecret().equals(ctx.header(AUTH_HEADER_NAME))) {
+				throw new UnauthenticatedRequest();
+			}
+
+			List<ExternalTransfer> externalTransfers = DSL.using(conn, SQLDialect.POSTGRES)
+					.select(asterisk())
+					.from(ExternalTransfer.table())
+					.where(ExternalTransfer.accountIdField().eq(accountId))
+					.fetchInto(ExternalTransfer.class);
+
+			List<InternalTransfer> internalTransfers = DSL.using(conn, SQLDialect.POSTGRES)
+					.select(asterisk())
+					.from(InternalTransfer.table())
+					.where(InternalTransfer.destinationAccountIdField().eq(accountId))
+					.fetchInto(InternalTransfer.class);
+
+			ctx.json(AccountFetchResponse.build(account, user, externalTransfers, internalTransfers));
 			ctx.status(HttpStatus.OK);
 		}
 	}

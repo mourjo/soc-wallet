@@ -19,6 +19,7 @@ public class Launcher {
 		return Javalin.create(OpenAPISetup::registerPlugins)
 				.post("/user", controller::createUser)
 				.get("/user/{userId}", controller::retrieveUser)
+				.get("/account/{accountId}", controller::retrieveAccount)
 				.post("/account", controller::createAccount)
 				.post("/transfer/external", controller::createExternalTransfer)
 				.post("/transfer/internal", controller::createInternalTransfer)
