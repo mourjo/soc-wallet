@@ -1,7 +1,6 @@
 package soc.wallet.web;
 
 import static org.jooq.impl.DSL.asterisk;
-import static org.jooq.impl.DSL.row;
 import static soc.wallet.common.Constants.AUTH_HEADER_NAME;
 
 import io.javalin.http.Context;
@@ -24,8 +23,10 @@ import org.jooq.impl.DSL;
 import soc.wallet.common.Environment;
 import soc.wallet.entities.AccountEntity;
 import soc.wallet.entities.ExternalTransfer;
+import soc.wallet.entities.InternalTransfer;
 import soc.wallet.entities.UserEntity;
 import soc.wallet.exceptions.AccountCreationFailedException;
+import soc.wallet.exceptions.InvalidTransferException;
 import soc.wallet.exceptions.UnauthenticatedRequest;
 import soc.wallet.exceptions.UserAlreadyExistsException;
 import soc.wallet.exceptions.UserNotFoundException;
@@ -34,10 +35,11 @@ import soc.wallet.web.dto.AccountCreationResponse;
 import soc.wallet.web.dto.ErrorResponse;
 import soc.wallet.web.dto.ExternalTransferCreationRequest;
 import soc.wallet.web.dto.ExternalTransferCreationResponse;
+import soc.wallet.web.dto.InternalTransferCreationRequest;
+import soc.wallet.web.dto.InternalTransferCreationResponse;
 import soc.wallet.web.dto.UserCreationRequest;
 import soc.wallet.web.dto.UserCreationResponse;
 import soc.wallet.web.dto.UserFetchResponse;
-import soc.wallet.web.soc.wallet.exceptions.InvalidTransferException;
 
 @Slf4j
 public class Controller {
@@ -239,67 +241,190 @@ public class Controller {
 		try (Connection conn = getConnection()) {
 			DSL.using(conn, SQLDialect.POSTGRES)
 					.transaction(trx -> {
-						try {
+						AccountEntity account = trx.dsl()
+								.select(asterisk())
+								.from(AccountEntity.table())
+								.where(AccountEntity.idField().eq(request.accountId()))
+								.fetchOneInto(AccountEntity.class);
 
-							AccountEntity account = trx.dsl()
-									.select(asterisk())
-									.from(AccountEntity.table())
-									.where(AccountEntity.idField().eq(request.accountId()))
-									.fetchOneInto(AccountEntity.class);
-
-							if (account == null) {
-								throw new InvalidTransferException("Account does not exist");
-							}
-
-							BigDecimal resultingBalance = account.getBalance().add(amount);
-							if (resultingBalance.compareTo(BigDecimal.ZERO) < 0) {
-								throw new InvalidTransferException(
-										"There is not enough balance to execute this transfer"
-								);
-							}
-
-							if (!account.getCurrency().equals(request.currency().name())) {
-								throw new InvalidTransferException(
-										"Transfer currency and account currency cannot be different"
-								);
-							}
-
-							ExternalTransfer transfer = trx.dsl()
-									.insertInto(ExternalTransfer.table())
-									.columns(
-											ExternalTransfer.amountField(),
-											ExternalTransfer.sourceField(),
-											ExternalTransfer.accountIdField()
-									).values(
-											amount,
-											request.source(),
-											account.getId()
-									).returningResult(
-											ExternalTransfer.idField(),
-											ExternalTransfer.accountIdField(),
-											ExternalTransfer.createdAtField())
-									.fetchOneInto(ExternalTransfer.class);
-
-							int rowsUpdated = trx.dsl().update(AccountEntity.table())
-									.set(row(AccountEntity.balanceField()), row(resultingBalance))
-									.where(AccountEntity.idField().eq(account.getId()))
-									.execute();
-
-							if (transfer == null || rowsUpdated != 1) {
-								throw new InvalidTransferException("Failed to create transfer");
-							}
-
-							var response = ExternalTransferCreationResponse.build(
-									transfer,
-									resultingBalance,
-									account.getCurrency()
-							);
-
-							ctx.json(response);
-							ctx.status(HttpStatus.CREATED);
-						} catch (IntegrityConstraintViolationException ex) {
-							throw new AccountCreationFailedException();
+						if (account == null) {
+							throw new InvalidTransferException("Account does not exist");
 						}
+
+						BigDecimal resultingBalance = account.getBalance().add(amount);
+						if (resultingBalance.compareTo(BigDecimal.ZERO) < 0) {
+							throw new InvalidTransferException(
+									"There is not enough balance to execute this transfer"
+							);
+						}
+
+						if (!account.getCurrency().equals(request.currency().name())) {
+							throw new InvalidTransferException(
+									"Transfer currency and account currency cannot be different"
+							);
+						}
+
+						ExternalTransfer transfer = trx.dsl()
+								.insertInto(ExternalTransfer.table())
+								.columns(
+										ExternalTransfer.amountField(),
+										ExternalTransfer.sourceField(),
+										ExternalTransfer.accountIdField()
+								).values(
+										amount,
+										request.source(),
+										account.getId()
+								).returningResult(
+										ExternalTransfer.idField(),
+										ExternalTransfer.accountIdField(),
+										ExternalTransfer.createdAtField()
+								).fetchOneInto(ExternalTransfer.class);
+
+						int rowsUpdated = trx.dsl()
+								.update(AccountEntity.table())
+								.set(AccountEntity.balanceField(),
+										AccountEntity.balanceField().add(amount))
+								.where(AccountEntity.idField().eq(account.getId()))
+								.execute();
+
+						if (transfer == null || rowsUpdated != 1) {
+							throw new InvalidTransferException("Failed to create transfer");
+						}
+
+						var response = ExternalTransferCreationResponse.build(
+								transfer,
+								resultingBalance,
+								account.getCurrency()
+						);
+
+						ctx.json(response);
+						ctx.status(HttpStatus.CREATED);
+
+					});
+		}
+	}
+
+
+	@SneakyThrows
+	@OpenApi(
+			summary = "Internal Transfer",
+			operationId = "internalTrasnfer",
+			path = "/transfer/internal",
+			requestBody = @OpenApiRequestBody(required = true, content = {
+					@OpenApiContent(from = InternalTransferCreationRequest.class)}),
+			methods = HttpMethod.POST,
+			headers = {
+					@OpenApiParam(name = AUTH_HEADER_NAME, required = true, description = "Authentication Token")},
+			responses = {
+					@OpenApiResponse(status = "201", content = {
+							@OpenApiContent(from = InternalTransferCreationResponse.class)}),
+					@OpenApiResponse(status = "400", content = {
+							@OpenApiContent(from = ErrorResponse.class)}),
+					@OpenApiResponse(status = "401", content = {
+							@OpenApiContent(from = ErrorResponse.class)})
+			}
+	)
+	public void createInternalTransfer(Context ctx) {
+		if (!Environment.getApiSecret().equals(ctx.header(AUTH_HEADER_NAME))) {
+			throw new UnauthenticatedRequest();
+		}
+
+		var request = ctx.bodyAsClass(InternalTransferCreationRequest.class);
+		BigDecimal amount = new BigDecimal(request.amount());
+
+		if (amount.compareTo(BigDecimal.ZERO) < 0) {
+			throw new InvalidTransferException("Negative transfers not allowed");
+		}
+
+		if (request.sourceAccount() == request.destinationAccount()) {
+			throw new InvalidTransferException("Self transfers not allowed");
+		}
+
+		try (Connection conn = getConnection()) {
+			DSL.using(conn, SQLDialect.POSTGRES)
+					.transaction(trx -> {
+						AccountEntity sourceAccount = trx.dsl()
+								.select(asterisk())
+								.from(AccountEntity.table())
+								.where(AccountEntity.idField().eq(request.sourceAccount()))
+								.fetchOneInto(AccountEntity.class);
+
+						AccountEntity destinationAccount = trx.dsl()
+								.select(asterisk())
+								.from(AccountEntity.table())
+								.where(AccountEntity.idField().eq(request.destinationAccount()))
+								.fetchOneInto(AccountEntity.class);
+
+						if (sourceAccount == null || destinationAccount == null) {
+							throw new InvalidTransferException("Account does not exist");
+						}
+
+						BigDecimal resultingSourceBalance = sourceAccount.getBalance()
+								.subtract(amount);
+						BigDecimal resultingDestinationBalance = destinationAccount.getBalance()
+								.add(amount);
+
+						if (resultingSourceBalance.compareTo(BigDecimal.ZERO) < 0) {
+							throw new InvalidTransferException(
+									"There is not enough balance to execute this transfer"
+							);
+						}
+
+						if (!sourceAccount.getCurrency().equals(request.currency().name()) ||
+								!destinationAccount.getCurrency()
+										.equals(request.currency().name())) {
+							throw new InvalidTransferException(
+									"Transfer currency and account currency cannot be different"
+							);
+						}
+
+						InternalTransfer transfer = trx.dsl()
+								.insertInto(InternalTransfer.table())
+								.columns(
+										InternalTransfer.amountField(),
+										InternalTransfer.sourceAccountIdField(),
+										InternalTransfer.destinationAccountIdField()
+								).values(
+										amount,
+										request.sourceAccount(),
+										request.destinationAccount()
+								).returningResult(
+										InternalTransfer.idField(),
+										InternalTransfer.sourceAccountIdField(),
+										InternalTransfer.destinationAccountIdField(),
+										InternalTransfer.amountField(),
+										InternalTransfer.createdAtField()
+								).fetchOneInto(InternalTransfer.class);
+
+						int sourceAccountUpdatedRows = trx.dsl()
+								.update(AccountEntity.table())
+								.set(AccountEntity.balanceField(),
+										AccountEntity.balanceField().subtract(amount))
+								.where(AccountEntity.idField().eq(sourceAccount.getId()))
+								.execute();
+
+						int destinationAccountUpdatedRows = trx.dsl()
+								.update(AccountEntity.table())
+								.set(AccountEntity.balanceField(),
+										AccountEntity.balanceField().add(amount))
+								.where(AccountEntity.idField().eq(destinationAccount.getId()))
+								.execute();
+
+						if (transfer == null || sourceAccountUpdatedRows != 1
+								|| destinationAccountUpdatedRows != 1) {
+							throw new InvalidTransferException("Failed to create transfer");
+						}
+
+						var response = InternalTransferCreationResponse.build(
+								transfer,
+								resultingSourceBalance,
+								resultingDestinationBalance,
+								sourceAccount.getCurrency()
+						);
+
+						ctx.json(response);
+						ctx.status(HttpStatus.CREATED);
+
 					});
 		}
 	}

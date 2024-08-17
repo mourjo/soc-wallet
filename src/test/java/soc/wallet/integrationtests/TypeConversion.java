@@ -7,6 +7,7 @@ import okhttp3.Response;
 import soc.wallet.web.dto.AccountCreationResponse;
 import soc.wallet.web.dto.ErrorResponse;
 import soc.wallet.web.dto.ExternalTransferCreationResponse;
+import soc.wallet.web.dto.InternalTransferCreationResponse;
 import soc.wallet.web.dto.UserCreationResponse;
 import soc.wallet.web.dto.UserFetchResponse;
 
@@ -32,6 +33,14 @@ public class TypeConversion {
 	public static ExternalTransferCreationResponse toExternalTransferCreationResponse(
 			Response response) {
 		var typeRef = new TypeReference<ExternalTransferCreationResponse>() {
+		};
+		return jackson.fromJsonString(response.body().string(), typeRef.getType());
+	}
+
+	@SneakyThrows
+	public static InternalTransferCreationResponse toInternalTransferCreationResponse(
+			Response response) {
+		var typeRef = new TypeReference<InternalTransferCreationResponse>() {
 		};
 		return jackson.fromJsonString(response.body().string(), typeRef.getType());
 	}

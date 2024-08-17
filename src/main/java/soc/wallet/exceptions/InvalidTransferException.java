@@ -1,7 +1,6 @@
-package soc.wallet.web.soc.wallet.exceptions;
+package soc.wallet.exceptions;
 
 import io.javalin.http.HttpStatus;
-import soc.wallet.exceptions.WalletException;
 import soc.wallet.web.dto.ErrorResponse;
 
 public class InvalidTransferException extends WalletException {

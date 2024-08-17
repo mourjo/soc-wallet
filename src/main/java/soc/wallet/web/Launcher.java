@@ -21,6 +21,7 @@ public class Launcher {
 				.get("/user/{userId}", controller::retrieveUser)
 				.post("/account", controller::createAccount)
 				.post("/transfer/external", controller::createExternalTransfer)
+				.post("/transfer/internal", controller::createInternalTransfer)
 				.exception(Exception.class, ExceptionHandler::handleException);
 	}
 }
