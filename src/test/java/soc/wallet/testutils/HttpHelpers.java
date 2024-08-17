@@ -27,11 +27,18 @@ public class HttpHelpers {
 	public static ExternalTransferCreationRequest externalTransferRequest(
 			AccountEntity account,
 			String amount) {
+		return externalTransferRequest(account, amount, UUID.randomUUID().toString());
+	}
+
+	public static ExternalTransferCreationRequest externalTransferRequest(
+			AccountEntity account,
+			String amount,
+			String source) {
 		return new ExternalTransferCreationRequest(
 				account.getId(),
 				SupportedCurrency.valueOf(account.getCurrency()),
 				amount,
-				UUID.randomUUID().toString()
+				source
 		);
 	}
 
@@ -73,12 +80,16 @@ public class HttpHelpers {
 		);
 	}
 
-	public static void externalTransfer(HttpClient client, AccountEntity account, String amount) {
+	public static void externalTransfer(HttpClient client, AccountEntity account, String amount, String source) {
 		client.post(
 				"/transfer/external",
-				externalTransferRequest(account, amount),
+				externalTransferRequest(account, amount, source),
 				headers()
 		);
+	}
+
+	public static void externalTransfer(HttpClient client, AccountEntity account, String amount) {
+		externalTransfer(client, account, amount, UUID.randomUUID().toString());
 	}
 
 	public static void internalTransfer(HttpClient client, AccountEntity source,

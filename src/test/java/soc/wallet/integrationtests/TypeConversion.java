@@ -5,6 +5,7 @@ import io.javalin.json.JavalinJackson;
 import lombok.SneakyThrows;
 import okhttp3.Response;
 import soc.wallet.web.dto.AccountCreationResponse;
+import soc.wallet.web.dto.AccountFetchResponse;
 import soc.wallet.web.dto.ErrorResponse;
 import soc.wallet.web.dto.ExternalTransferCreationResponse;
 import soc.wallet.web.dto.InternalTransferCreationResponse;
@@ -25,6 +26,13 @@ public class TypeConversion {
 	@SneakyThrows
 	public static AccountCreationResponse toAccountCreationResponse(Response response) {
 		var typeRef = new TypeReference<AccountCreationResponse>() {
+		};
+		return jackson.fromJsonString(response.body().string(), typeRef.getType());
+	}
+
+	@SneakyThrows
+	public static AccountFetchResponse toAccountFetchResponse(Response response) {
+		var typeRef = new TypeReference<AccountFetchResponse>() {
 		};
 		return jackson.fromJsonString(response.body().string(), typeRef.getType());
 	}

@@ -202,13 +202,19 @@ public class Controller {
 					.where(ExternalTransfer.accountIdField().eq(accountId))
 					.fetchInto(ExternalTransfer.class);
 
-			List<InternalTransfer> internalTransfers = DSL.using(conn, SQLDialect.POSTGRES)
+			List<InternalTransfer> internalCreditTransfers = DSL.using(conn, SQLDialect.POSTGRES)
 					.select(asterisk())
 					.from(InternalTransfer.table())
 					.where(InternalTransfer.destinationAccountIdField().eq(accountId))
 					.fetchInto(InternalTransfer.class);
 
-			ctx.json(AccountFetchResponse.build(account, user, externalTransfers, internalTransfers));
+			List<InternalTransfer> internalDebitTransfers = DSL.using(conn, SQLDialect.POSTGRES)
+					.select(asterisk())
+					.from(InternalTransfer.table())
+					.where(InternalTransfer.sourceAccountIdField().eq(accountId))
+					.fetchInto(InternalTransfer.class);
+
+			ctx.json(AccountFetchResponse.build(account, user, externalTransfers, internalCreditTransfers, internalDebitTransfers));
 			ctx.status(HttpStatus.OK);
 		}
 	}

@@ -10,6 +10,7 @@ import soc.wallet.entities.AccountEntity;
 import soc.wallet.entities.ExternalTransfer;
 import soc.wallet.entities.InternalTransfer;
 import soc.wallet.entities.UserEntity;
+import soc.wallet.web.dto.TransferInfo.TransferType;
 
 public record AccountFetchResponse(long id, String balance, String currency, long userId,  String userEmail, String createdAt,
 								   List<TransferInfo> transfers) {
@@ -18,7 +19,8 @@ public record AccountFetchResponse(long id, String balance, String currency, lon
 			AccountEntity account,
 			UserEntity user,
 			List<ExternalTransfer> externalTransfers,
-			List<InternalTransfer> internalTransfers
+			List<InternalTransfer> internalCreditTransfers,
+			List<InternalTransfer> internalDebitTransfers
 	) {
 
 		var externalTransferInfo = externalTransfers.stream()
@@ -32,19 +34,31 @@ public record AccountFetchResponse(long id, String balance, String currency, lon
 						)
 				).toList();
 
-		var internalTransferInfo = internalTransfers.stream()
+		var internalCreditTransferInfo = internalCreditTransfers.stream()
 				.map(
 						tr -> new TransferInfo(
 								tr.getId(),
 								Long.toString(tr.getSourceAccountId()),
 								tr.getAmount().toPlainString(),
-								TransferType.INTERNAL,
+								TransferType.INTERNAL_CREDIT,
+								DateTimeFormatter.ISO_DATE_TIME.format(tr.getCreatedAt())
+						)
+				).toList();
+
+		var internalDebitTransferInfo = internalDebitTransfers.stream()
+				.map(
+						tr -> new TransferInfo(
+								tr.getId(),
+								Long.toString(tr.getDestinationAccountId()),
+								"-" + tr.getAmount().toPlainString(),
+								TransferType.INTERNAL_DEBIT,
 								DateTimeFormatter.ISO_DATE_TIME.format(tr.getCreatedAt())
 						)
 				).toList();
 
 		var allTransfers = new ArrayList<>(externalTransferInfo);
-		allTransfers.addAll(internalTransferInfo);
+		allTransfers.addAll(internalCreditTransferInfo);
+		allTransfers.addAll(internalDebitTransferInfo);
 		Collections.sort(allTransfers);
 
 		return new AccountFetchResponse(
