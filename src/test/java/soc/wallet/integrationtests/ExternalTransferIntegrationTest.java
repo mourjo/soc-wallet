@@ -30,8 +30,8 @@ public class ExternalTransferIntegrationTest {
 			Assertions.assertEquals("INR", body.currency().toString());
 			Assertions.assertEquals(account.getId(), body.accountId());
 		});
-		var updatedAccount = DbHelpers.getAccount(account.getId());
-		Assertions.assertEquals(100, DbHelpers.getBalance(updatedAccount));
+
+		Assertions.assertEquals(100, DbHelpers.getBalance(account));
 	}
 
 	@Test
@@ -55,8 +55,7 @@ public class ExternalTransferIntegrationTest {
 			}
 		});
 
-		var updatedAccount = DbHelpers.getAccount(account.getId());
-		Assertions.assertEquals(450.5, DbHelpers.getBalance(updatedAccount));
+		Assertions.assertEquals(450.5, DbHelpers.getBalance(account));
 	}
 
 	@Test
