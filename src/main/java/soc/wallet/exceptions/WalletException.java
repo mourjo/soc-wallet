@@ -5,20 +5,20 @@ import soc.wallet.web.dto.ErrorResponse;
 
 public abstract class WalletException extends RuntimeException {
 
-	public WalletException() {
-		super();
-	}
+    public WalletException() {
+        super();
+    }
 
-	public WalletException(String message) {
-		super(message);
-	}
+    public WalletException(String message) {
+        super(message);
+    }
 
-	abstract public ErrorResponse buildResponse();
+    abstract public ErrorResponse buildResponse();
 
-	abstract public HttpStatus getStatus();
+    abstract public HttpStatus getStatus();
 
-	@Override
-	public String getMessage() {
-		return buildResponse().message();
-	}
+    @Override
+    public String getMessage() {
+        return buildResponse().message();
+    }
 }

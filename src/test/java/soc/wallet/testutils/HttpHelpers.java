@@ -17,88 +17,88 @@ import soc.wallet.web.dto.SupportedCurrency;
 
 public class HttpHelpers {
 
-	final static Random r = new Random();
+    final static Random r = new Random();
 
-	@NotNull
-	public static Consumer<Builder> headers() {
-		return req -> req.header(AUTH_HEADER_NAME, Environment.getApiSecret());
-	}
+    @NotNull
+    public static Consumer<Builder> headers() {
+        return req -> req.header(AUTH_HEADER_NAME, Environment.getApiSecret());
+    }
 
-	public static ExternalTransferCreationRequest externalTransferRequest(
-			AccountEntity account,
-			String amount) {
-		return externalTransferRequest(account, amount, UUID.randomUUID().toString());
-	}
+    public static ExternalTransferCreationRequest externalTransferRequest(
+        AccountEntity account,
+        String amount) {
+        return externalTransferRequest(account, amount, UUID.randomUUID().toString());
+    }
 
-	public static ExternalTransferCreationRequest externalTransferRequest(
-			AccountEntity account,
-			String amount,
-			String source) {
-		return new ExternalTransferCreationRequest(
-				account.getId(),
-				SupportedCurrency.valueOf(account.getCurrency()),
-				amount,
-				source
-		);
-	}
+    public static ExternalTransferCreationRequest externalTransferRequest(
+        AccountEntity account,
+        String amount,
+        String source) {
+        return new ExternalTransferCreationRequest(
+            account.getId(),
+            SupportedCurrency.valueOf(account.getCurrency()),
+            amount,
+            source
+        );
+    }
 
-	public static ExternalTransferCreationRequest externalTransferRequest(
-			long sourceAccount,
-			String currency,
-			String amount) {
-		return new ExternalTransferCreationRequest(
-				sourceAccount,
-				SupportedCurrency.valueOf(currency),
-				amount,
-				UUID.randomUUID().toString()
-		);
-	}
+    public static ExternalTransferCreationRequest externalTransferRequest(
+        long sourceAccount,
+        String currency,
+        String amount) {
+        return new ExternalTransferCreationRequest(
+            sourceAccount,
+            SupportedCurrency.valueOf(currency),
+            amount,
+            UUID.randomUUID().toString()
+        );
+    }
 
 
-	public static InternalTransferCreationRequest internalTransferRequest(
-			AccountEntity source,
-			AccountEntity destination,
-			String amount) {
-		return new InternalTransferCreationRequest(
-				source.getId(),
-				destination.getId(),
-				SupportedCurrency.valueOf(source.getCurrency()),
-				amount
-		);
-	}
+    public static InternalTransferCreationRequest internalTransferRequest(
+        AccountEntity source,
+        AccountEntity destination,
+        String amount) {
+        return new InternalTransferCreationRequest(
+            source.getId(),
+            destination.getId(),
+            SupportedCurrency.valueOf(source.getCurrency()),
+            amount
+        );
+    }
 
-	public static InternalTransferCreationRequest internalTransferRequest(
-			long sourceAccount,
-			long destinationAccount,
-			String currency,
-			String amount) {
-		return new InternalTransferCreationRequest(
-				sourceAccount,
-				destinationAccount,
-				SupportedCurrency.valueOf(currency),
-				amount
-		);
-	}
+    public static InternalTransferCreationRequest internalTransferRequest(
+        long sourceAccount,
+        long destinationAccount,
+        String currency,
+        String amount) {
+        return new InternalTransferCreationRequest(
+            sourceAccount,
+            destinationAccount,
+            SupportedCurrency.valueOf(currency),
+            amount
+        );
+    }
 
-	public static void externalTransfer(HttpClient client, AccountEntity account, String amount,
-			String source) {
-		client.post(
-				"/transfer/external",
-				externalTransferRequest(account, amount, source),
-				headers()
-		);
-	}
+    public static void externalTransfer(HttpClient client, AccountEntity account, String amount,
+        String source) {
+        client.post(
+            "/transfer/external",
+            externalTransferRequest(account, amount, source),
+            headers()
+        );
+    }
 
-	public static void externalTransfer(HttpClient client, AccountEntity account, String amount) {
-		externalTransfer(client, account, amount, UUID.randomUUID().toString());
-	}
+    public static void externalTransfer(HttpClient client, AccountEntity account, String amount) {
+        externalTransfer(client, account, amount, UUID.randomUUID().toString());
+    }
 
-	public static void internalTransfer(HttpClient client, AccountEntity source,
-			AccountEntity destination, String amount) {
-		client.post(
-				"/transfer/internal",
-				internalTransferRequest(source, destination, amount),
-				headers()
-		);
-	}
+    public static void internalTransfer(HttpClient client, AccountEntity source,
+        AccountEntity destination, String amount) {
+        client.post(
+            "/transfer/internal",
+            internalTransferRequest(source, destination, amount),
+            headers()
+        );
+    }
 }

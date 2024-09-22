@@ -9,20 +9,20 @@ import soc.wallet.web.javalin.OpenAPISetup;
 @Slf4j
 public class Launcher {
 
-	public static void main(String[] args) {
-		buildApp().start(Environment.getServerPort());
-	}
+    public static void main(String[] args) {
+        buildApp().start(Environment.getServerPort());
+    }
 
-	public static Javalin buildApp() {
-		final Controller controller = new Controller();
+    public static Javalin buildApp() {
+        final Controller controller = new Controller();
 
-		return Javalin.create(OpenAPISetup::registerPlugins)
-				.post("/user", controller::createUser)
-				.get("/user/{userId}", controller::retrieveUser)
-				.get("/account/{accountId}", controller::retrieveAccount)
-				.post("/account", controller::createAccount)
-				.post("/transfer/external", controller::createExternalTransfer)
-				.post("/transfer/internal", controller::createInternalTransfer)
-				.exception(Exception.class, ExceptionHandler::handleException);
-	}
+        return Javalin.create(OpenAPISetup::registerPlugins)
+            .post("/user", controller::createUser)
+            .get("/user/{userId}", controller::retrieveUser)
+            .get("/account/{accountId}", controller::retrieveAccount)
+            .post("/account", controller::createAccount)
+            .post("/transfer/external", controller::createExternalTransfer)
+            .post("/transfer/internal", controller::createInternalTransfer)
+            .exception(Exception.class, ExceptionHandler::handleException);
+    }
 }

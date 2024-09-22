@@ -5,24 +5,24 @@ import soc.wallet.web.dto.ErrorResponse;
 
 public class InvalidTransferException extends WalletException {
 
-	String message;
+    String message;
 
-	private InvalidTransferException() {
-		super();
-	}
+    private InvalidTransferException() {
+        super();
+    }
 
-	public InvalidTransferException(String message) {
-		super(message);
-		this.message = message;
-	}
+    public InvalidTransferException(String message) {
+        super(message);
+        this.message = message;
+    }
 
-	@Override
-	public ErrorResponse buildResponse() {
-		return ErrorResponse.build(message);
-	}
+    @Override
+    public ErrorResponse buildResponse() {
+        return ErrorResponse.build(message);
+    }
 
-	@Override
-	public HttpStatus getStatus() {
-		return HttpStatus.BAD_REQUEST;
-	}
+    @Override
+    public HttpStatus getStatus() {
+        return HttpStatus.BAD_REQUEST;
+    }
 }
