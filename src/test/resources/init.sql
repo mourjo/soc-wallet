@@ -1,5 +1,4 @@
-\
-c postgres;
+\c postgres;
 
 DROP DATABASE IF EXISTS soc_wallet_test_db;
 CREATE DATABASE soc_wallet_test_db;
@@ -9,8 +8,7 @@ DROP DATABASE IF EXISTS soc_wallet_db;
 CREATE DATABASE soc_wallet_db;
 GRANT ALL PRIVILEGES ON DATABASE soc_wallet_db TO justin;
 
-\
-c soc_wallet_db;
+\c soc_wallet_db;
 
 -- -----------------------------------------------
 -- Tables
@@ -213,8 +211,7 @@ WHERE id=calculated_account_balances.account_id;
 -- Copy the above to the test database
 -- ***********************************************
 
-\
-c soc_wallet_test_db;
+\c soc_wallet_test_db;
 
 -- -----------------------------------------------
 -- Tables
