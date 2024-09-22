@@ -1,6 +1,7 @@
 package soc.wallet.entities;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -10,6 +11,7 @@ import org.jooq.impl.DSL;
 @Table(name = "external_transfers")
 public class ExternalTransfer {
 
+	@Id
 	@Column(name = "id")
 	long id;
 

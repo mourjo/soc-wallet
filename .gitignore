@@ -19,3 +19,5 @@ buildNumber.properties
 
 .idea
 tmp
+.DS_Store
+**/.DS_Store

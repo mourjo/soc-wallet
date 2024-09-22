@@ -2,6 +2,17 @@
 
 [![Maven Build with Docker](https://github.com/mourjo/soc-wallet/actions/workflows/maven.yml/badge.svg)](https://github.com/mourjo/soc-wallet/actions/workflows/maven.yml)
 
+## Scope
+
+This is a repository that implements the following functionalities. It does so in a manner that
+does not separate concerns out well. But it still works. Submit a pull request if you see
+any improvements!
+
+- Create and fetch users
+- Create and fetch wallet accounts
+- Users can make internal transfers to other wallets
+- Users can transfer money from external accounts to their wallet
+
 ## Start dependent services
 
 ```bash
@@ -40,6 +51,8 @@ API_SECRET=humpty_dumpty ./mvnw clean compile exec:java  -Dexec.mainClass="soc.w
 
 There is a Swagger page that will provide details about the individual APIs
 http://localhost:8818/swagger-ui
+
+![](src/test/resources/swagger.png)
 
 ## Running tests
 
